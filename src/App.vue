@@ -3,15 +3,7 @@
 </script>
 
 <template>
-  <div class="box"></div>
-
   <router-view></router-view>
 </template>
 
-<style scoped lang="scss">
-.box {
-  width: 100px;
-  height: 100px;
-  background-color: red;
-}
-</style>
+<style scoped lang="scss"></style>

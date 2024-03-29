@@ -5,20 +5,20 @@ const router = createRouter({
     history: createWebHistory(),
     routes
 });
-// router.beforeEach((to, from, next) => {
-//     // 未登录 重定向至login
-//     if (to.fullPath !== '/login' && !localStorage.getItem('token')) {
-
-//         console.log(5555);
+router.beforeEach((to, from, next) => {
+    // 未登录 重定向至login
+    if (to.fullPath !== '/login' && !localStorage.getItem('token')) {
 
 
-//         next({ name: 'login' })
-//     }
-//     else {
-//         next()
-//     }
 
-// })
+
+        next({ name: 'login' })
+    }
+    else {
+        next()
+    }
+
+})
 
 export default router;
 
