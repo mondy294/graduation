@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="test">
 
     </div>
 </template>
@@ -8,4 +8,10 @@
 
 </script>
 
-<style scoped></style>
+<style scoped lang="scss">
+.test {
+    width: 100px;
+    height: 100px;
+    background-color: blue;
+}
+</style>

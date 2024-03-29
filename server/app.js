@@ -23,11 +23,17 @@ app.use(express.json({ limit: '5mb' }));
 
 
 app.use(express.static('assest'))
-app.use(express.static('dist'))
+// app.use(express.static('dist'))
 //配置表单数据解析
 app.use(express.urlencoded({ extended: false }))
 
 app.use(expressJWT({ secret: config.jwtSecretKey }).unless({ path: [/^\/api/] }))
+
+
+
+//导入用户模块
+const userRouter = require('./router/user')
+app.use('/api', userRouter)
 
 
 //错误级别中间件

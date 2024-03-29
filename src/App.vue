@@ -4,6 +4,8 @@
 
 <template>
   <div class="box"></div>
+
+  <router-view></router-view>
 </template>
 
 <style scoped lang="scss">

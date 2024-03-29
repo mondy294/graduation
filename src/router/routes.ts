@@ -1,6 +1,6 @@
 import { RouteRecordRaw } from 'vue-router'
 
-import Home from '../pages/home.vue'
+import Home from '../pages/Home.vue'
 
 const routes: RouteRecordRaw[] = [
     {
@@ -10,7 +10,7 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/home',
         name: 'home',
-        components: Home
+        component: Home
     }
 ]
 
