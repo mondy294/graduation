@@ -10,3 +10,13 @@ body,
   width: 100%;
   height: 100%;
 }
+
+div {
+  box-sizing: border-box !important;
+}
+
+a {
+  cursor: pointer;
+  text-decoration: none;
+  color: #409eff;
+}

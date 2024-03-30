@@ -16,7 +16,7 @@ exports.register = (req, res) => {
 
     const userInfo = req.body
     console.log(userInfo);
-    const { password, nickname, account } = userInfo
+    const { password: { _value: password }, nickname: { _value: nickname }, account: { _value: account } } = userInfo
     let sql = "select * from user where account=?"
     db.query(sql, [account], function (err, results) {
         //如果查询失败
@@ -50,7 +50,7 @@ exports.login = (req, res) => {
 
     const userInfo = req.body
     console.log(userInfo);
-    const { password, account } = userInfo
+    const { password: { _value: password }, account: { _value: account } } = userInfo
     console.log(password, account);
     const sqlstr = 'select * from user where account=?'
     db.query(sqlstr, account, function (err, results) {

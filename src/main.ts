@@ -3,7 +3,12 @@ import './style.css'
 import App from './App.vue'
 import router from './router'
 
+import ElementPlus from 'element-plus'
+
+import 'element-plus/theme-chalk/el-loading.css';
+import 'element-plus/theme-chalk/el-message.css';
+
 const app = createApp(App)
-app.use(router)
+app.use(router).use(ElementPlus)
 
 app.mount('#app')
