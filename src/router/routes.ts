@@ -1,7 +1,7 @@
 import { RouteRecordRaw } from 'vue-router'
 
 import Home from '../pages/Home.vue'
-import Login from '../pages/Login.vue'
+import Login from '../pages/Login/Login.vue'
 
 const routes: RouteRecordRaw[] = [
     {

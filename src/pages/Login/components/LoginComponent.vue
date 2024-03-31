@@ -3,16 +3,12 @@
         <div class="login">
             <h2>登录</h2>
         </div>
-        <div class="username">
-            <div class="tag">用户名</div>
-            <el-input v-model="account" class="account" placeholder="Please input account" clearable @blur="aBlur" />
-            <div v-show="!account && accountBlur" class="warning">该项为必填项</div>
-        </div>
-        <div class="password">
-            <div class="tag">密码</div>
-            <el-input v-model="password" class="account" placeholder="Please input password" clearable @blur="pBlur" />
-            <div v-show="!password && passwordBlur" class="warning">
-                该项为必填项</div>
+        <div class="inputGroup" v-for="(item, idx) in inputGroup" :key="idx">
+            <div class="tag">{{ item.text }}</div>
+            <el-input v-model=item.flag :type="item.type ? 'password' : ''" class="account"
+                :placeholder="item.placeholder" clearable @blur="inputBlur(item)" @input="inputing(item)" />
+            <div v-show="item.eventFlag" class="warning">{{ item.warning }}
+            </div>
         </div>
 
         <div class="remember">
@@ -24,16 +20,18 @@
             <el-button type="primary" class="btn" @click="login" :loading="loading">登录</el-button>
         </div>
         <div class="register_btn">
-            <el-button class="btn">注册</el-button>
+            <el-button class="btn" @click="toRegister">注册</el-button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Login } from '../api/index'
+import { Login } from '../../../api/index'
 import { useRouter } from 'vue-router'
+import { inputGroup, inputItem } from '../../../utils/login'
+
 
 
 const router = useRouter()
@@ -45,15 +43,33 @@ let passwordBlur = ref(false)
 let remember = ref(false)
 let loading = ref(false)
 
-function aBlur(): void {
-    accountBlur.value = true
-}
-function pBlur(): void {
-    passwordBlur.value = true
-}
+const model = defineModel()
+
+const inputGroup = reactive([
+    {
+        text: '用户名',
+        flag: account,
+        eventFlag: accountBlur,
+        placeholder: 'Please input username',
+        warning: '请输入账号',
+        type: false
+    },
+    {
+        text: '密码',
+        flag: password,
+        eventFlag: passwordBlur,
+        placeholder: 'Please input password',
+        warning: '请输入密码',
+        type: true
+    },
+])
 const blank = () => {
     ElMessage.error('账号或密码未填写')
 }
+const inputing = (item: inputItem) => {
+    item.eventFlag = false
+}
+
 
 async function login() {
     if (!account.value || !password.value) {
@@ -79,6 +95,16 @@ async function login() {
     }
 }
 
+const toRegister = () => {
+    model.value = !model.value
+}
+const inputBlur = (item: inputItem) => {
+    item.eventFlag = !item.flag ? true : false
+    if (item.text == '确认密码' && item.flag !== password.value) {
+        item.eventFlag = true
+    }
+}
+
 </script>
 
 <style scoped lang="scss">
@@ -93,6 +119,7 @@ async function login() {
 }
 
 .login_model {
+    position: absolute;
     text-align: center;
     box-sizing: border-box;
     padding: 20px;
@@ -102,7 +129,7 @@ async function login() {
         margin-bottom: 22px;
     }
 
-    .username {
+    .inputGroup {
         padding: 0 10px;
         margin-bottom: 25px;
 

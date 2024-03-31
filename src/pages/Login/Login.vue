@@ -2,24 +2,43 @@
     <div class="container">
         <div class="left">
             <div class="left_content">
-                <img src="../assets/login_logo.svg">
+                <img src="../../assets/login_logo.svg">
                 <div class="welcome">欢迎使用本系统</div>
                 <div class="system_name">供应链企业碳配额协同管理系统</div>
             </div>
         </div>
         <div class="right">
-            <LoginComponent></LoginComponent>
+            <transition name="animate__animated animate__bounce" enter-active-class="animate__flipInX"
+                leave-active-class="animate__flipOutX">
+                <LoginComponent v-show="!status" key="1" v-model="status"></LoginComponent>
+            </transition>
+            <transition name="animate__animated animate__bounce" enter-active-class="animate__flipInX"
+                leave-active-class="animate__flipOutX ">
+                <RegisterComponent v-show="status" key="2" v-model="status"></RegisterComponent>
+            </transition>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import LoginComponent from '../components/LoginComponent.vue'
+import LoginComponent from './components/LoginComponent.vue'
+import RegisterComponent from './components/RegisterComponent.vue'
+import { ref } from 'vue'
+
+// 处于登录还是注册状态
+let status = ref(false)
+
+
+
 
 
 </script>
 
 <style scoped lang="scss">
+.animate__animated {
+    --animate-duration: 800ms !important;
+}
+
 .container {
     display: flex;
     position: relative;
