@@ -11,6 +11,7 @@
             </div>
         </div>
 
+
         <div class="remember">
             <el-checkbox v-model="remember" label="记住我" size="large" />
             <a>忘记密码</a>
@@ -28,9 +29,10 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Login } from '../../../api/index'
+import { Login } from '@/api/index'
 import { useRouter } from 'vue-router'
-import { inputGroup, inputItem } from '../../../utils/login'
+import { InputItem } from '@/utils/login'
+
 
 
 
@@ -66,10 +68,6 @@ const inputGroup = reactive([
 const blank = () => {
     ElMessage.error('账号或密码未填写')
 }
-const inputing = (item: inputItem) => {
-    item.eventFlag = false
-}
-
 
 async function login() {
     if (!account.value || !password.value) {
@@ -82,27 +80,38 @@ async function login() {
     }
 
     loading.value = true
-    let res = await Login(userInfo)
-    if (res.data.status == 0) {
-        loading.value = false
-        account.value = ''
-        password.value = ''
-        localStorage.setItem('token', res.data.token)
-        localStorage.setItem('user', JSON.stringify(res.data.user))
-        router.push({ name: 'home' })
-    } else {
+
+    try {
+        let res = await Login(userInfo)
+        console.log(res);
+
+        if (res.data.status == 0) {
+            loading.value = false
+            account.value = ''
+            password.value = ''
+            localStorage.setItem('token', res.data.token)
+            localStorage.setItem('user', JSON.stringify(res.data.user))
+            router.push({ name: 'home' })
+        } else {
+            loading.value = false
+        }
+    } catch (error) {
         loading.value = false
     }
+
 }
 
 const toRegister = () => {
     model.value = !model.value
 }
-const inputBlur = (item: inputItem) => {
+const inputBlur = (item: InputItem) => {
     item.eventFlag = !item.flag ? true : false
     if (item.text == '确认密码' && item.flag !== password.value) {
         item.eventFlag = true
     }
+}
+const inputing = (item: InputItem) => {
+    item.eventFlag = false
 }
 
 </script>

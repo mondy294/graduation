@@ -3,6 +3,7 @@ import qs from 'qs'
 import { ElMessage } from 'element-plus'
 import { PORT } from '../HttpConfig'
 import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios'
+import { error } from 'console'
 
 let token = localStorage.getItem('token')
 
@@ -22,13 +23,14 @@ requests.defaults.transformRequest = (data, headers) => {
     return data;
 };
 
+// 响应拦截器
 requests.interceptors.response.use((res: AxiosResponse) => {
     if (res.data.status == 1) {
-
         ElMessage.error(res.data.message)
     }
     return res
-
+}, error => {
+    ElMessage.error(error)
 })
 
 

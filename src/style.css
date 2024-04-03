@@ -25,4 +25,6 @@ a {
 :root {
   --animate-duration: 500ms;
   --animate-delay: 0s;
+
+  user-select: none !important;
 }

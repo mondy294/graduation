@@ -1,17 +1,37 @@
-import { RouteRecordRaw } from 'vue-router'
 
-import Home from '../pages/Home.vue'
-import Login from '../pages/Login/Login.vue'
+import Home from '@/pages/Layout/Layout.vue'
+import Login from '@/pages/Login/Login.vue'
+import Analysis from '@/pages/Analysis/Analysis.vue'
+import Workbench from '@/pages/Workbench/Workbench.vue'
 
-const routes: RouteRecordRaw[] = [
+
+const routes: any[] = [
     {
         path: '/',
-        redirect: '/home'
+        redirect: '/home/dashboard'
     },
     {
-        path: '/home',
+        path: '/home/dashboard',
         name: 'home',
-        component: Home
+        component: Home,
+        children: [
+            {
+                path: 'analysis',
+                component: Analysis,
+                name: 'analysis',
+                meta: {
+                    pageName: '分析页'
+                }
+            },
+            {
+                path: 'workbench',
+                component: Workbench,
+                name: 'workbench',
+                meta: {
+                    pageName: '工作页'
+                }
+            }
+        ]
     },
     {
         path: '/login',

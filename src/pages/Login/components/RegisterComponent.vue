@@ -25,7 +25,7 @@ import { Register } from '../../../api/index'
 import { ref, reactive } from 'vue';
 import { ElMessage } from 'element-plus';
 
-import { inputGroup, inputItem } from '../../../utils/login'
+import { InputItem } from '../../../utils/login'
 
 
 
@@ -81,13 +81,13 @@ const toLogin = () => {
     model.value = !model.value
 }
 
-const inputBlur = (item: inputItem) => {
+const inputBlur = (item: InputItem) => {
     item.eventFlag = !item.flag ? true : false
     if (item.text == '确认密码' && item.flag !== password.value) {
         item.eventFlag = true
     }
 }
-const inputing = (item: inputItem) => {
+const inputing = (item: InputItem) => {
     item.eventFlag = false
 }
 

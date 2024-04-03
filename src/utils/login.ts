@@ -1,8 +1,8 @@
-export interface inputGroup {
-    [index: number]: inputItem
+export interface InputGroup {
+    [index: number]: InputItem
 }
 
-export interface inputItem {
+export interface InputItem {
     text: String,
     flag: any,
     eventFlag: any,
