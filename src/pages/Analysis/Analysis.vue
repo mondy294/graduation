@@ -20,22 +20,22 @@
             </div>
         </div>
         <div class="charts">
+            <!-- 标签头 -->
             <div class="tabs-container">
                 <el-tabs v-model="activeName" class="demo-tabs" @tab-change="handleClick">
-                    <el-tab-pane label="User" name="1">
+                    <el-tab-pane label="User" :name="index" v-for="(item, index) in chartList" :key="index">
                         <template #label>
                             <div class="chart-name">
-                                1111
+                                {{ item.tag }}
                             </div>
                         </template>
                     </el-tab-pane>
-                    <el-tab-pane label="Config" name="2"></el-tab-pane>
                 </el-tabs>
             </div>
+            <!--图标区域 -->
             <div class="charts-container">
-                <div :style="{ opacity: activeName == 'first' ? 1 : 0 }" ref="myChart1" id="myChart1" class="myChart">
-                </div>
-                <div :style="{ opacity: activeName == 'first' ? 0 : 1 }" ref="myChart2" id="myChart2" class="myChart">
+                <div v-for="(item, index) in chartList" :key="index" :style="{ opacity: activeName == index ? 1 : 0 }"
+                    :id="item.id" class="myChart">
                 </div>
             </div>
 
@@ -46,76 +46,45 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, ref } from 'vue';
+import { getCurrentInstance, onMounted, reactive, ref } from 'vue';
 import { dataList, chartList } from '@/assets/index.ts';
 
-
-
-const activeName = ref('first')
-
-
+const activeName = ref(0)
 
 // 通过 internalInstance.appContext.config.globalProperties 获取全局属性或方法
 
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance.appContext.config.globalProperties.$echarts;
 
-let Chart1: any = ref()
-
-let Chart2: any = ref()
+const chartData = reactive([])
 
 onMounted(() => {
-    draw(Chart1, 'myChart1')
-    draw(Chart2, 'myChart2')
+    // 生成容器数组
+    chartList.forEach((item, idx) => {
+        chartData.push(ref())
+        draw(chartData[idx], item.id, item.option)
+    });
+
 })
 
-const handleClick = () => {
-
-    Chart1.value.clear()
-    Chart2.value.clear()
-
-    draw(Chart1, 'myChart1')
-    draw(Chart2, 'myChart2')
+const handleClick = (tabName) => {
+    // 排他算法
+    chartData.forEach(element => {
+        element.value.clear()
+    });
+    // 重绘
+    draw(chartData[tabName], chartList[tabName].id, chartList[tabName].option)
 
 
 }
-const draw = (chart, id) => {
+//绘画函数
+const draw = (chart, id, option) => {
 
     const dom = document.getElementById(id);
     chart.value = echarts.init(dom); // 初始化echarts实例
 
-    const option = {
-        xAxis: {
-            type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-        },
-        yAxis: {
-            type: 'value',
-
-        },
-        grid: {
-            show: true,
-            containLabel: true,
-            left: '5%',
-            top: '5%',
-            bottom: '5%',
-            right: '3%'
-        },
-        series: [
-            {
-                data: [820, 932, 901, 934, 1290, 1330, 1320],
-                type: 'line',
-                smooth: true,
-                areaStyle: {
-                    color: '#90D2FD',
-                    opacity: 0.5
-                }
-            }
-        ]
-    };
     // 设置实例参数
     chart.value.setOption(option);
-    // chat.clear()
 
 }
 

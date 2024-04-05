@@ -118,6 +118,7 @@ const dataList: DataList = [
 const chartList: any = [
     {
         id: 'myChat1',
+        tag: '访问量',
         option: {
             xAxis: {
                 type: 'category',
@@ -150,6 +151,7 @@ const chartList: any = [
     },
     {
         id: 'myChat2',
+        tag: '交易额',
         option: {
             xAxis: {
                 type: 'category',
