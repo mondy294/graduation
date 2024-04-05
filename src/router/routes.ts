@@ -16,6 +16,10 @@ const routes: any[] = [
         component: Home,
         children: [
             {
+                path: '/home/dashboard',
+                redirect: '/home/dashboard/analysis'
+            },
+            {
                 path: 'analysis',
                 component: Analysis,
                 name: 'analysis',

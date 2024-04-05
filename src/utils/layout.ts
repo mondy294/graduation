@@ -19,5 +19,27 @@ export interface ToolItem {
     tips?: string
 }
 
+export interface DataItem {
+    title?: string,
+    date?: string,
+    color?: string,
+    data?: string,
+    datacolor?: string,
+    logo?: string,
+    subtitle?: string,
+    subdata?: string
+}
+export interface DataList {
+    [index: number]: DataItem
+}
+
+export interface ChatList {
+
+}
+export interface ChatItem {
+
+}
+
+
 
 

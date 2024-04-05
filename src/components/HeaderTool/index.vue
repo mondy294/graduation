@@ -18,7 +18,6 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { ref, reactive, watch } from 'vue'
 import { ToolList } from '@/assets/index'
 
 const router = useRoute()
