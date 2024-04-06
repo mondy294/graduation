@@ -10,10 +10,8 @@ const userhandle = require('../router_handle/user')
 router.post('/register', userhandle.register)
 //登录
 router.post('/login', userhandle.login)
-// 获取好友列表
-router.get('/getFriends', userhandle.getFriends)
+//
+router.get('/trade', userhandle.trade)
 
-// 更换头像
-router.post('/updateAvator', multipartMiddleware, userhandle.updateAvator)
 
 module.exports = router

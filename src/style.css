@@ -28,3 +28,7 @@ a {
 
   user-select: none !important;
 }
+
+body {
+  position: relative;
+}

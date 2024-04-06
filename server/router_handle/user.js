@@ -79,46 +79,17 @@ exports.login = (req, res) => {
 
 }
 
-exports.getFriends = (req, res) => {
-    const id = req.query.id
-    console.log(id);
-    const sqlstr = 'select * from user where id != ?'
-    db.query(sqlstr, id, function (err, results) {
+
+exports.trade = (req, res) => {
+    // res.send('123')
+    const sqlstr = 'select * from trade where status = 0'
+    db.query(sqlstr, function (err, results) {
         if (err) {
-            return res.send({ status: 0, message: err.message })
+            return res.send({ status: 1, message: err.message })
         }
         else {
-            res.send({ list: results, status: 0, message: '获取成功' })
+            res.send({ data: results, status: 0, message: '获取成功' })
         }
     })
 }
 
-exports.updateAvator = async (req, res) => {
-    // console.log(req);
-
-    let data = req.files.file
-    fs.writeFileSync('./assest/' + data.originalFilename, fs.readFileSync(data.path));
-
-    // 用户信息
-    const bu = req.files.json
-    const buffer = fs.readFileSync(bu.path)
-    const json = buffer.toString('utf-8')
-    const obj = JSON.parse(json)
-    const id = obj.id
-    const filename = data.originalFilename
-
-    const sqlstr = 'update user set user_pic=? where id=?'
-    db.query(sqlstr, [filename, id], function (err, results) {
-        if (err) {
-            return res.send({ status: 1, message: err })
-
-        }
-        else if (results.affectedRows !== 1) {
-            return res.send({ status: 1, message: "更换失败" })
-
-        }
-        else {
-            return res.send({ status: 0, message: "更改成功", data: { id, user_pic: filename } })
-        }
-    })
-}

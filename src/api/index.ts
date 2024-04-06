@@ -17,4 +17,11 @@ export const Login = (data: any) => {
         data,
     })
 }
+//获取所有可购买订单
+export const Trade = () => {
+    return requests({
+        url: '/trade',
+        method: 'get',
+    })
+}
 

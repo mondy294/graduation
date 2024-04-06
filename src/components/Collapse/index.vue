@@ -33,10 +33,12 @@ import { LayOutItem } from '@/utils/layout'
 const props = defineProps(['layOutList'])
 const { layOutList } = props
 
-const arr = reactive([])
+// 现在打开的面板
+const arr = reactive([0])
 const now = reactive([0, 0])
 
 const router = useRouter()
+
 
 const currentCollapse = (index: number) => {
     let povit = arr.indexOf(index)

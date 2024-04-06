@@ -17,16 +17,20 @@ const layOutList: LayOutList = [
         ]
     },
     {
-        text: 'Dashboard',
-        path: '/dashboard',
+        text: '交易中心',
+        path: '/trade',
         children: [
             {
-                text: '分析页',
-                path: '/analysis'
+                text: '交易中心',
+                path: '/trade'
             },
             {
-                text: '工作页',
-                path: '/workbench'
+                text: '订单记录',
+                path: '/order'
+            },
+            {
+                text: '商品交易',
+                path: '/products'
             }
         ]
     },
@@ -184,4 +188,116 @@ const chartList: any = [
     }
 ]
 
-export { layOutList, ToolList, dataList, chartList }
+const pieChartList: any = [
+    {
+        header: '转化率',
+        id: 'piechart1',
+        option: {
+            title: {
+                text: '圆环图的例子',
+                left: 'center',
+                top: 'center'
+            },
+            legend: {
+                orient: 'horizontal',
+                x: 'center',
+                y: '335',
+                data: ['A', 'B', 'C']
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: [
+                        {
+                            value: 335,
+                            name: 'A'
+                        },
+                        {
+                            value: 234,
+                            name: 'B'
+                        },
+                        {
+                            value: 1548,
+                            name: 'C'
+                        }
+                    ],
+                    radius: ['40%', '70%']
+                }
+            ]
+        }
+    },
+    {
+        header: '转化率',
+        id: 'piechart2',
+
+        option: {
+            title: {
+                text: '圆环图的例子',
+                left: 'center',
+                top: 'center'
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: [
+                        {
+                            value: 335,
+                            name: 'A'
+                        },
+                        {
+                            value: 234,
+                            name: 'B'
+                        },
+                        {
+                            value: 1548,
+                            name: 'C'
+                        }
+                    ],
+                    radius: ['40%', '70%']
+                }
+            ]
+        }
+    },
+    {
+        header: '转化率',
+        id: 'piechart3',
+
+        option: {
+            legend: {
+                orient: 'horizontal',
+                x: 'center',
+                y: '335',
+                data: ['A', 'B', 'C', 'D', 'E']
+            },
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: true,
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: '30',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    data: [
+                        { value: 335, name: 'A' },
+                        { value: 310, name: 'B' },
+                        { value: 234, name: 'C' },
+                        { value: 135, name: 'D' },
+                        { value: 1548, name: 'E' }
+                    ]
+                }
+            ]
+        }
+    },
+]
+export { layOutList, ToolList, dataList, chartList, pieChartList }
