@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken')
 //全局配置文件
 const config = require('../config')
 
+const EditRepertory = require('./utils.js').EditRepertory
+
 
 
 const fs = require('fs')
@@ -15,7 +17,6 @@ const fs = require('fs')
 exports.register = (req, res) => {
 
     const userInfo = req.body
-    console.log(userInfo);
     const { password: { _value: password }, nickname: { _value: nickname }, account: { _value: account } } = userInfo
     let sql = "select * from user where account=?"
     db.query(sql, [account], function (err, results) {
@@ -71,7 +72,7 @@ exports.login = (req, res) => {
                     status: 0,
                     message: '登陆成功',
                     token: 'Bearer ' + tokenStr,
-                    user: { id: user.id, user_pic: user.user_pic, nickname: user.nickname }
+                    user: { id: user.id, user_pic: user.user_pic, nickname: user.nickname, repertory: user.repertory }
                 })
             }
         }
@@ -81,15 +82,112 @@ exports.login = (req, res) => {
 
 
 exports.trade = (req, res) => {
-    // res.send('123')
-    const sqlstr = 'select * from trade where status = 0'
-    db.query(sqlstr, function (err, results) {
+    const { id, page } = req.query
+    // 如果是交易中心页面发来的请求
+    if (page == 'trade') {
+        const sqlstr = 'select * from trade where sellid!=?'
+        db.query(sqlstr, id, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                res.send({ data: results, status: 0, message: '获取成功' })
+            }
+        })
+    }
+    if (page == 'products') {
+        const sqlstr = 'select * from trade where sellid=?'
+        db.query(sqlstr, id, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                res.send({ data: results, status: 0, message: '获取成功' })
+            }
+        })
+    }
+
+}
+
+exports.buy = (req, res) => {
+    // 者里需要查询一次当前商品的剩余量 确保数据的一致性
+    const info = req.body
+    const { id, remain, sellid, seller, buyid, buyer, count, totalmoney, repertory, orderid } = info
+    const sqlstr = 'update trade set remain = ? where id=?'
+    db.query(sqlstr, [remain, id], function (err, results) {
         if (err) {
             return res.send({ status: 1, message: err.message })
         }
         else {
-            res.send({ data: results, status: 0, message: '获取成功' })
+            // 往已完成的订单列表中新增订单
+            let sqlstr = 'insert into orderlist (orderid,sellid,seller,buyid,buyer,count,totalmoney) values(?,?,?,?,?,?,?)'
+            db.query(sqlstr, [orderid, sellid, seller, buyid, buyer, count, totalmoney], function (err, results) {
+                if (err) {
+                    return res.send({ status: 1, message: err.message })
+                }
+                else {
+                    // 更新买家的库存
+                    let sqlstr = 'update user set repertory = ? where id=?'
+                    db.query(sqlstr, [repertory, buyid], function (err, results) {
+                        if (err) {
+                            return res.send({ status: 1, message: err.message })
+                        }
+                        else {
+                            res.send({ status: 0, message: '操作成功' })
+                        }
+                    })
+                }
+            })
         }
     })
 }
 
+exports.cancle = (req, res) => {
+    const { idList, repertory, sellid } = req.body
+    let sqlstr = 'delete from trade where id = ?'
+    for (let i = 0; i < idList.length; i++) {
+        db.query(sqlstr, idList[i], function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 返还库存
+                res.send({ status: 0, message: '删除成功' })
+            }
+        })
+    }
+    EditRepertory(repertory, sellid, res)
+}
+
+exports.publish = (req, res) => {
+    const data = req.body
+    const params = Object.values(data)
+    const { sellid } = data
+    const repertory = params.pop()
+    // 发布商品
+    const sqlstr = 'insert into trade ( sellid, seller, date, price, count, remain ) values(?,?,?,?,?,?)'
+    db.query(sqlstr, params, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 更改库存
+            EditRepertory(repertory, sellid, res, '发布成功')
+        }
+    })
+}
+
+// 查询当前库存
+exports.repertory = (req, res) => {
+    const { id } = req.query
+    const sqlstr = 'select * from user where id= ?'
+    db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 更改库存
+            res.send({ data: results, status: 0 })
+        }
+    })
+}

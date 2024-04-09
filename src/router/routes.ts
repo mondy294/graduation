@@ -27,7 +27,8 @@ const routes: any[] = [
                 component: Analysis,
                 name: 'analysis',
                 meta: {
-                    pageName: '分析页'
+                    pageName: '分析页',
+                    id: [0, 0]
                 }
             },
             {
@@ -35,7 +36,8 @@ const routes: any[] = [
                 component: Workbench,
                 name: 'workbench',
                 meta: {
-                    pageName: '工作页'
+                    pageName: '工作页',
+                    id: [0, 1]
                 }
             }
         ]
@@ -50,7 +52,8 @@ const routes: any[] = [
                 component: Trade,
                 name: 'trade',
                 meta: {
-                    pageName: '交易中心'
+                    pageName: '交易中心',
+                    id: [1, 0]
                 }
             },
             {
@@ -58,7 +61,8 @@ const routes: any[] = [
                 component: Order,
                 name: 'order',
                 meta: {
-                    pageName: '订单记录'
+                    pageName: '订单记录',
+                    id: [1, 1]
                 }
             },
             {
@@ -66,7 +70,8 @@ const routes: any[] = [
                 component: Products,
                 name: 'products',
                 meta: {
-                    pageName: '商品交易'
+                    pageName: '商品交易',
+                    id: [1, 2]
                 }
             },
         ]

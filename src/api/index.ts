@@ -18,10 +18,44 @@ export const Login = (data: any) => {
     })
 }
 //获取所有可购买订单
-export const Trade = () => {
+export const Trade = (params: any) => {
     return requests({
         url: '/trade',
         method: 'get',
+        params
     })
 }
+// 购买
+export const Purchase = (data: any) => {
+    return requests({
+        url: '/buy',
+        method: 'post',
+        data
+    })
+}
+// 撤销商品
+export const Cancle = (data: any) => {
+    return requests({
+        url: '/cancle',
+        method: 'post',
+        data,
+    })
+}
+// 发布商品
+export const Publish = (data: any) => {
+    return requests({
+        url: '/publish',
+        method: 'post',
+        data,
+    })
+}
+// 查询库存
+export const Repertory = (params: any) => {
+    return requests({
+        url: '/repertory',
+        method: 'get',
+        params,
+    })
+}
+
 

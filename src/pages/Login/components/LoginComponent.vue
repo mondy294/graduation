@@ -83,7 +83,6 @@ async function login() {
 
     try {
         let res = await Login(userInfo)
-        console.log(res);
 
         if (res.data.status == 0) {
             loading.value = false
@@ -91,7 +90,9 @@ async function login() {
             password.value = ''
             localStorage.setItem('token', res.data.token)
             localStorage.setItem('user', JSON.stringify(res.data.user))
-            router.push({ name: 'home' })
+            router.push('/home/dashboard')
+            ElMessage.success('登陆成功')
+
         } else {
             loading.value = false
         }

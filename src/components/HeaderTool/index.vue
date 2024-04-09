@@ -1,7 +1,7 @@
 <template>
     <div class="header">
         <div class="path-name">
-            <span>{{ router.name }} / {{ router.meta.pageName }}</span>
+            <span>{{ route.name }} / {{ route.meta.pageName }}</span>
         </div>
         <div class="toolList">
             <div class="toolItem" v-for="(item, index) in ToolList" :key="index">
@@ -20,12 +20,7 @@
 import { useRoute } from 'vue-router'
 import { ToolList } from '@/assets/index'
 
-const router = useRoute()
-
-
-
-
-
+const route = useRoute()
 
 
 </script>

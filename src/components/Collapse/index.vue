@@ -25,20 +25,20 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { defineProps, reactive, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { LayOutItem } from '@/utils/layout'
 
 
 const props = defineProps(['layOutList'])
 const { layOutList } = props
 
-// 现在打开的面板
-const arr = reactive([0])
-const now = reactive([0, 0])
 
+const route = useRoute()
 const router = useRouter()
-
+// 现在打开的面板route
+const arr = reactive([route.meta.id[0]])
+const now = reactive([...route.meta.id as any])
 
 const currentCollapse = (index: number) => {
     let povit = arr.indexOf(index)
