@@ -61,7 +61,7 @@ const routes: any[] = [
                 component: Order,
                 name: 'order',
                 meta: {
-                    pageName: '订单记录',
+                    pageName: '我的购买',
                     id: [1, 1]
                 }
             },

@@ -25,7 +25,7 @@ const layOutList: LayOutList = [
                 path: '/trade'
             },
             {
-                text: '订单记录',
+                text: '购买记录',
                 path: '/order'
             },
             {
@@ -35,17 +35,13 @@ const layOutList: LayOutList = [
         ]
     },
     {
-        text: 'Dashboard',
-        path: '/dashboard',
+        text: '碳价行情',
+        path: '/market',
         children: [
             {
-                text: '分析页',
-                path: '/analysis'
+                text: '行情面板',
+                path: '/panel'
             },
-            {
-                text: '工作页',
-                path: '/workbench'
-            }
         ]
     },
     {
@@ -65,7 +61,7 @@ const layOutList: LayOutList = [
 
 ]
 
-const ToolList: ToolList = [
+const toolList: ToolList = [
     {
         icon: '&#xe86e;',
         tips: '搜索'
@@ -300,4 +296,4 @@ const pieChartList: any = [
         }
     },
 ]
-export { layOutList, ToolList, dataList, chartList, pieChartList }
+export { layOutList, toolList, dataList, chartList, pieChartList }

@@ -112,16 +112,17 @@ exports.trade = (req, res) => {
 exports.buy = (req, res) => {
     // 者里需要查询一次当前商品的剩余量 确保数据的一致性
     const info = req.body
-    const { id, remain, sellid, seller, buyid, buyer, count, totalmoney, repertory, orderid } = info
+    const { id, remain, sellid, seller, buyid, buyer, count, totalmoney, repertory, orderid, price, date } = info
     const sqlstr = 'update trade set remain = ? where id=?'
     db.query(sqlstr, [remain, id], function (err, results) {
         if (err) {
             return res.send({ status: 1, message: err.message })
         }
         else {
+            console.log(totalmoney);
             // 往已完成的订单列表中新增订单
-            let sqlstr = 'insert into orderlist (orderid,sellid,seller,buyid,buyer,count,totalmoney) values(?,?,?,?,?,?,?)'
-            db.query(sqlstr, [orderid, sellid, seller, buyid, buyer, count, totalmoney], function (err, results) {
+            let sqlstr = 'insert into orderlist (orderid,sellid,seller,buyid,buyer,count,totalmoney,price,date) values(?,?,?,?,?,?,?,?,?)'
+            db.query(sqlstr, [orderid, sellid, seller, buyid, buyer, count, totalmoney, price, date], function (err, results) {
                 if (err) {
                     return res.send({ status: 1, message: err.message })
                 }
@@ -182,6 +183,21 @@ exports.repertory = (req, res) => {
     const { id } = req.query
     const sqlstr = 'select * from user where id= ?'
     db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 更改库存
+            res.send({ data: results, status: 0 })
+        }
+    })
+}
+
+// 查询我的订单
+exports.myOrder = (req, res) => {
+    const { buyid } = req.query
+    const sqlstr = 'select * from orderlist where buyid= ?'
+    db.query(sqlstr, buyid, function (err, results) {
         if (err) {
             return res.send({ status: 1, message: err.message })
         }

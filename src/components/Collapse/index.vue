@@ -9,7 +9,7 @@
                     <span class="iconfont arrow">&#xe65f;</span>
                 </div>
 
-                <transition name="collapse">
+                <transition :name="test(item.children)">
                     <div class="content" v-if="arr.includes(index)">
                         <slot name="content" v-for="(child, idx) in item.children" :key="idx">
                             <div @click="cuttentOne(index, idx, child, item)"
@@ -54,6 +54,10 @@ const cuttentOne = (i: number, j: number, child: LayOutItem, father: LayOutItem)
     router.push(path)
 }
 
+
+const test = (children) => {
+    return `collapse${children.length}`
+}
 
 
 </script>
@@ -165,32 +169,61 @@ const cuttentOne = (i: number, j: number, child: LayOutItem, father: LayOutItem)
     color: #fff;
 }
 
-.collapse-panel .header {
-    cursor: pointer;
-    background-color: red;
-}
 
-.collapse-panel .content {
-    overflow: hidden;
-}
 
-.collapse-enter-active {
-    transition: all 0.2s ease;
-}
-
-.collapse-leave-active {
+.collapse3-enter-active {
     transition: all 0.05s ease;
 }
 
+.collapse3-leave-active {
+    transition: all 0.1s ease;
+}
 
-
-.collapse-enter-from,
-.collapse-leave-to {
+.collapse3-enter-from,
+.collapse3-leave-to {
     height: 0px;
 }
 
-.collapse-enter-to,
-.collapse-leave-from {
+.collapse3-enter-to,
+.collapse3-leave-from {
+    height: 135px;
+}
+
+// 2
+.collapse2-enter-active {
+    transition: all 0.2s ease;
+}
+
+.collapse2-leave-active {
+    transition: all 0.05s ease;
+}
+
+.collapse2-enter-from,
+.collapse2-leave-to {
+    height: 0px;
+}
+
+.collapse2-enter-to,
+.collapse2-leave-from {
     height: 90px;
+}
+
+// 1
+.collapse1-enter-active {
+    transition: all 0.5s ease;
+}
+
+.collapse1-leave-active {
+    transition: all 0.2s ease;
+}
+
+.collapse1-enter-from,
+.collapse1-leave-to {
+    height: 0px;
+}
+
+.collapse1-enter-to,
+.collapse1-leave-from {
+    height: 45px;
 }
 </style>

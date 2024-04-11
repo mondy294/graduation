@@ -2,10 +2,11 @@
     <div class="container">
         <div class="tool-header">
             <el-button type="primary" @click="dialogVisible = !dialogVisible">发布</el-button>
-            <el-button v-show="productList.data.length" type="primary" @click="cancle">撤消</el-button>
+            <el-button v-if="productList.data.length" type="primary" @click="cancle">撤消</el-button>
         </div>
-        <el-table ref="multipleTableRef" :data="productList.data.slice(10 * (currentPage - 1), 10 * currentPage)"
-            style="width: 100%" @selection-change="handleSelectionChange"
+        <el-table v-loading="loading" element-loading-text="Loading..."
+            :data="productList.data.slice(10 * (currentPage - 1), 10 * currentPage)" style="width: 100%"
+            @selection-change="handleSelectionChange" height="1200"
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="您暂未发布任何商品~">
 
             <el-table-column v-if="productList.data.length" type="selection" width="55" />
@@ -81,10 +82,11 @@
 
 <script setup lang="ts">
 import { Timer } from '@element-plus/icons-vue'
-import { Trade, Cancle, Publish, Repertory } from '@/api/index'
-import { getRepertory } from './index'
+import { Trade, Cancle, Publish } from '@/api/index'
 import { onMounted, reactive, ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
+import { getRepertory } from './index'
+
 
 import { TradeRow } from '@/utils/index'
 
@@ -103,6 +105,8 @@ const currentRepertory = ref(0)
 
 const currentPage = ref(1)
 
+const loading = ref(false)
+
 onMounted(async () => {
     currentRepertory.value = JSON.parse(localStorage.getItem('repertory'))
 
@@ -115,11 +119,15 @@ onMounted(async () => {
 })
 
 const getProducts = async () => {
+    loading.value = true
     const { id } = userInfo
     const res = await Trade({ id, page: 'products' })
     if (res.data.status == 0) {
         const { data } = res.data
         productList.data = data
+        setTimeout(() => {
+            loading.value = false
+        }, 500);
     }
 
 }
@@ -128,6 +136,10 @@ const editRow = () => {
 
 }
 const cancle = async () => {
+    if (selections.data.length == 0) {
+        ElMessage.warning('请选择至少一个商品')
+        return
+    }
     const idList = []
     let repertory = await getRepertory(userInfo.id)
     selections.data.forEach((item) => {
@@ -164,8 +176,7 @@ const publish = async () => {
 
 }
 const handleSelectionChange = (data) => {
-    selections.data = data
-
+    selections.data.push(...data)
 
 }
 

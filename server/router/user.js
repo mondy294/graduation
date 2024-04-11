@@ -20,6 +20,8 @@ router.post('/cancle', userhandle.cancle)
 router.post('/publish', userhandle.publish)
 // 查询当前库存
 router.get('/repertory', userhandle.repertory)
+// 查询我的购买记录
+router.get('/myOrder', userhandle.myOrder)
 
 
 

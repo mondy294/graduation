@@ -4,7 +4,7 @@
             <span>{{ route.name }} / {{ route.meta.pageName }}</span>
         </div>
         <div class="toolList">
-            <div class="toolItem" v-for="(item, index) in ToolList" :key="index">
+            <div class="toolItem" v-for="(item, index) in toolList" :key="index">
                 <el-tooltip class="box-item" effect="dark" :content="item.tips" placement="bottom">
                     <div v-if="item.icon" class="toolIcon iconfont" v-html="item.icon"></div>
                     <img v-else class="toolIcon" :src="item.image"></img>
@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { ToolList } from '@/assets/index'
+import { toolList } from '@/assets/index'
 
 const route = useRoute()
 

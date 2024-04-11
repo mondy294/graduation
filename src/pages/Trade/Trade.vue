@@ -22,10 +22,8 @@
             <div class="smartBuy">
                 <el-button type="primary" @click="smartChoose">智能选择</el-button>
             </div>
-
-
         </div>
-        <el-table v-loading="loading" ref="multipleTableRef"
+        <el-table v-loading="loading" element-loading-text="Loading..."
             :data="productList.data.slice(10 * (currentPage - 1), 10 * currentPage)" height="1200"
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="暂无任何发布~">
             <el-table-column v-if="false" type="selection" width="55" />
@@ -118,7 +116,6 @@ const currentRow = reactive({
     data: {} as TradeRow
 })
 
-const multipleTableRef = ref()
 // 展示对话框
 const dialogVisible = ref(false)
 // 当前金额
@@ -129,7 +126,7 @@ const currentRepertory = ref(0)
 
 const currentPage = ref(1)
 
-const loading = ref(true)
+const loading = ref(false)
 
 
 
@@ -182,7 +179,8 @@ const searchChange = () => {
 // 获取卖家名单
 const getNameList = (() => {
     let arr = productList.data.map((item) => item.seller)
-    nameList.push(...arr)
+    nameList.push(...Array.from(new Set(arr)))
+
 })
 // 搜索后筛选
 const filterProduct = (seller: string) => {
@@ -220,7 +218,9 @@ const getTrade = async () => {
             productList.data = data.filter((item: any) => item.remain > 0)
             // 备份数组
             copy.push(...data)
-            loading.value = false
+            setTimeout(() => {
+                loading.value = false
+            }, 500);
         }
         else {
             ElMessage.error(res.data.message)
@@ -248,11 +248,13 @@ const confirm = (type: string) => {
             break
         case ('confirm'):
             Buy(currentRow.data, count.value)
-            handleClose()
             break
     }
 }
 const Buy = async (row: TradeRow, count: number) => {
+    let timer = new Date()
+    // 生成当前时间字符串
+    let date = timer.toLocaleDateString() + ' ' + timer.toLocaleTimeString()
     let repertory = await getRepertory(userInfo.id)
     let { id: buyid, nickname: buyer } = userInfo
     const id = row.id
@@ -260,17 +262,18 @@ const Buy = async (row: TradeRow, count: number) => {
     // 购买之后剩余的数量
     const remain = currentRow.data.remain - count
 
-    const { sellid, seller, id: orderid } = currentRow.data
+    const { sellid, seller, id: orderid, price } = currentRow.data
     const totalmoney = totalMoney.value
     // 购买后当前用户碳配额增长
     repertory = repertory + count
-    const info = { id, remain, buyid, buyer, count, totalmoney, sellid, seller, repertory, orderid }
+    const info = { id, remain, buyid, buyer, count, totalmoney, sellid, seller, repertory, orderid, price, date }
     const res = await Purchase(info)
     if (res.data.status == 0) {
         await getRepertory(userInfo.id)
         // 重新获取商品信息
         await getTrade()
         ElMessage.success('购买成功')
+        handleClose()
 
     }
 

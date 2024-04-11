@@ -7,3 +7,16 @@ export interface TradeRow {
     price: number,
     remain: number
 }
+
+export interface orderItem {
+    id: number,
+    seller: string,
+    sellid: number,
+    buyer: string,
+    sbuyid: number,
+    date: string,
+    count: number,
+    price: number,
+    totalmoney: number
+}
+

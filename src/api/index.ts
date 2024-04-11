@@ -57,5 +57,13 @@ export const Repertory = (params: any) => {
         params,
     })
 }
+// 查询库存
+export const MyOrder = (params: any) => {
+    return requests({
+        url: '/myOrder',
+        method: 'get',
+        params,
+    })
+}
 
 
