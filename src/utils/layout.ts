@@ -16,7 +16,8 @@ export interface ToolItem {
     icon: string,
     image?: string,
     title?: string,
-    tips?: string
+    tips?: string,
+    path?: string
 }
 
 export interface DataItem {

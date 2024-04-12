@@ -20,3 +20,16 @@ export interface orderItem {
     totalmoney: number
 }
 
+export interface MessageBox {
+    text?: string,
+    id: number,
+    targetId?: number,
+    type: MessageType
+}
+
+enum MessageType {
+    LOGIN = 0,
+    ADD_FRIEND = 1,
+
+}
+

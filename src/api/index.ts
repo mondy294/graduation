@@ -57,7 +57,7 @@ export const Repertory = (params: any) => {
         params,
     })
 }
-// 查询库存
+// 查询订单
 export const MyOrder = (params: any) => {
     return requests({
         url: '/myOrder',
@@ -65,5 +65,32 @@ export const MyOrder = (params: any) => {
         params,
     })
 }
+// 获取好友
+export const getFriend = (params: any) => {
+    return requests({
+        url: '/getFriend',
+        method: 'get',
+        params,
+    })
+}
+
+// 添加好友
+export const addFriend = (data: any) => {
+    return requests({
+        url: '/addFriend',
+        method: 'post',
+        data,
+    })
+}
+
+// 获取用户信息
+export const getUserInfo = (params: any) => {
+    return requests({
+        url: '/userInfo',
+        method: 'get',
+        params,
+    })
+}
+
 
 

@@ -5,7 +5,13 @@ const joi = require('@hapi/joi')
 const bodyParser = require('body-parser')
 // const startWebsocket = require('./websocket/index')
 const history = require('connect-history-api-fallback')
+const InitWebsocket = require('./webscoket/index')
 
+// 开启websocket服务
+const server = InitWebsocket()
+server.listen(3000, () => {
+    console.log('websocket running')
+})
 
 //允许跨域
 const cors = require('cors')

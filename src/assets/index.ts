@@ -64,15 +64,18 @@ const layOutList: LayOutList = [
 const toolList: ToolList = [
     {
         icon: '&#xe86e;',
-        tips: '搜索'
+        tips: '搜索',
+        path: ''
     },
     {
         icon: '&#xe650;',
-        tips: ''
+        tips: '消息',
+        path: ''
     },
     {
         icon: '&#xe68d;',
-        tips: '聊天'
+        tips: '聊天',
+        path: '/home/chat'
     }
 ]
 

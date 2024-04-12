@@ -6,6 +6,7 @@ import Workbench from '@/pages/Workbench/Workbench.vue'
 import Trade from '@/pages/Trade/Trade.vue'
 import Products from '@/pages/Trade/Products.vue'
 import Order from '@/pages/Trade/Order.vue'
+import Chat from '@/pages/Chat/Chat.vue'
 
 
 const routes: any[] = [
@@ -77,10 +78,27 @@ const routes: any[] = [
         ]
     },
     {
+        path: '/home',
+        name: 'chat',
+        component: Home,
+        children: [
+            {
+                path: 'chat',
+                component: Chat,
+                name: 'chat',
+                meta: {
+                    pageName: '聊天',
+                    id: [1, 2]
+                }
+            },
+        ]
+    },
+    {
         path: '/login',
         name: 'login',
         component: Login
     },
+
 
 ]
 

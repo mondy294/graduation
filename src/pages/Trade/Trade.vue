@@ -91,14 +91,13 @@
 
 <script setup lang="ts">
 import { Timer } from '@element-plus/icons-vue'
-import { Trade } from '@/api/index'
+import { Trade, Purchase, addFriend, getFriend, getUserInfo } from '@/api/index'
 import { onMounted, reactive, ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 
-import { TradeRow } from '@/utils/index'
+import { TradeRow, MessageBox } from '@/utils/index'
 import { getRepertory } from './index'
 
-import { Purchase } from '@/api/index'
 
 const productList = reactive({
     data: []
@@ -129,12 +128,7 @@ const currentPage = ref(1)
 const loading = ref(false)
 
 
-
-interface User {
-    date: string
-    name: string
-    address: string
-}
+const socket = window.socket
 
 
 onMounted(async () => {
@@ -154,8 +148,41 @@ const handleBuy = (index: number, row: any) => {
     // price.value = row.price
     totalMoney.value = row.price
 }
-const handleAddFriend = (index: number, row: User) => {
-    console.log(index, row)
+// 发送好友请求
+const handleAddFriend = async (index: number, row: TradeRow) => {
+    const { sellid } = row
+    const res = await getUserInfo({ id: userInfo.id })
+    if (res.data.status == 0) {
+        console.log(res.data)
+        // 获取当前已有的好友请求
+        let { data: { prefriends: currentFriend } } = res.data
+        currentFriend = currentFriend == "null" ? [] : JSON.parse(currentFriend).friends
+        // 追加当前请求
+        if (!currentFriend.includes(sellid + '')) {
+            currentFriend.push(sellid + '')
+        }
+
+
+        // 没有text代表时好友请求
+        const messageBox: MessageBox = {
+            id: userInfo.id,
+            targetId: sellid,
+            type: 1
+        }
+        socket.send(JSON.stringify(messageBox))
+
+        // 发送好友申请
+        const response = await addFriend({ friends: currentFriend, id: userInfo.id, type: 0 })
+        if (response.data.status == 0) {
+            ElMessage.success('请求成功，等待对方通过~')
+        }
+
+
+
+
+    }
+
+
 }
 // 模糊搜索
 const searchChange = () => {

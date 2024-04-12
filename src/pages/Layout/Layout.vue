@@ -22,9 +22,38 @@
 
 <script setup lang="ts">
 
+import { reactive } from 'vue'
 import Collapse from '@/components/Collapse/index.vue'
 import HeaderTool from '@/components/HeaderTool/index.vue'
 import { layOutList } from '@/assets/index'
+import createWebsocket from '@/api/websocket'
+import { MessageBox } from '@/utils/index'
+
+import { LOGIN, ADD_FRIEND } from '@/constant'
+
+const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
+
+
+const socket = createWebsocket()
+socket.addEventListener('open', () => {
+    const messageBox: MessageBox = {
+        id: userInfo.id,
+        type: 0
+    }
+    socket.send(JSON.stringify(messageBox))
+
+})
+
+socket.addEventListener('message', (e) => {
+    // const message = JSON.parse(e.data)
+
+
+    // console.log('收到服务端信息：' + message.text);
+
+})
+
+window.socket = socket
+
 
 
 

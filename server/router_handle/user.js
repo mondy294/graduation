@@ -207,3 +207,96 @@ exports.myOrder = (req, res) => {
         }
     })
 }
+
+// 加好友
+exports.addFriend = (req, res) => {
+    let { friends, id, type, targetId } = req.body
+    friends = JSON.stringify({ friends: friends })
+    if (type == 0) {
+        const sqlstr = 'update user set prefriends = ? where id=?'
+        db.query(sqlstr, [friends, id], function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+    else {
+
+        const sqlstr = 'update user set friends = ? where id=?'
+        db.query(sqlstr, [friends, id], function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+
+}
+// 获取好友列表
+exports.getFriend = (req, res) => {
+    const { id } = req.query
+    const sqlstr = 'select  * from user where id = ?'
+
+    db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 如果还没有好友
+            if (results[0].friends == 'null') {
+                res.send({ data: [], status: 0 })
+                return
+            }
+            let friendStr = ''
+            const friends = JSON.parse(results[0].friends).friends
+            friends.forEach((item) => {
+                friendStr += item + ','
+            })
+            friendStr = friendStr.substring(0, friendStr.length - 1)
+            const sqlstr = `select  * from user where id in (${friendStr})`
+            db.query(sqlstr, function (err, results) {
+                if (err) {
+                    return res.send({ status: 1, message: err.message })
+                }
+                else {
+                    // 更改库存
+                    res.send({ data: results, status: 0 })
+                }
+            })
+        }
+    })
+
+}
+// 获取用户信息
+exports.userInfo = (req, res) => {
+    const { id } = req.query
+    let friendStr = ''
+    // 允许一次查询多个
+    const friends = Array.isArray(id) ? id : [id]
+    friends.forEach((item) => {
+        friendStr += item + ','
+    })
+    friendStr = friendStr.substring(0, friendStr.length - 1)
+    const sqlstr = `select  * from user where id in (${friendStr})`
+    db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            if (results.length > 1) {
+                res.send({ data: results, status: 0 })
+            }
+            else {
+                res.send({ data: results[0], status: 0 })
+            }
+
+        }
+    })
+}
