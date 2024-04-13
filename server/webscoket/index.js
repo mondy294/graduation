@@ -1,5 +1,5 @@
 const ws = require('nodejs-websocket')
-const { LOGIN, ADD_FRIEND } = require('./constant')
+const { LOGIN, ADD_FRIEND, TEXT } = require('./constant')
 const InitWebsocket = () => {
     const server = ws.createServer((connect) => {
         console.log('新用户连接');
@@ -12,6 +12,8 @@ const InitWebsocket = () => {
                 connect.id = data.id
             }
             else if (data.type == ADD_FRIEND) {
+                sendTo(server, data)
+            } else if (data.type == TEXT) {
                 sendTo(server, data)
             }
 
@@ -32,10 +34,12 @@ const InitWebsocket = () => {
 const sendTo = (server, message) => {
     const actions = {
         '1': friendAsk,
+        '3': friendAsk,
     }
     return actions[message.type](server, message)
 }
 function friendAsk(server, message) {
+
     server.connections.forEach(connect => {
         if (connect.id == message.targetId) {
             connect.send(JSON.stringify(message))

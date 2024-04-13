@@ -30,6 +30,8 @@ export interface MessageBox {
 enum MessageType {
     LOGIN = 0,
     ADD_FRIEND = 1,
+    FINISH_FRIEND = 2,
+    TEXT = 3
 
 }
 

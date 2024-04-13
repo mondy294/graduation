@@ -119,7 +119,6 @@ exports.buy = (req, res) => {
             return res.send({ status: 1, message: err.message })
         }
         else {
-            console.log(totalmoney);
             // 往已完成的订单列表中新增订单
             let sqlstr = 'insert into orderlist (orderid,sellid,seller,buyid,buyer,count,totalmoney,price,date) values(?,?,?,?,?,?,?,?,?)'
             db.query(sqlstr, [orderid, sellid, seller, buyid, buyer, count, totalmoney, price, date], function (err, results) {
@@ -296,6 +295,87 @@ exports.userInfo = (req, res) => {
             else {
                 res.send({ data: results[0], status: 0 })
             }
+
+        }
+    })
+}
+
+// 删除好友或者好友申请
+exports.cancleFriend = (req, res) => {
+    // 要删除的id
+    let { friends, id } = req.body
+    // 如果时空数组
+    if (!friends) friends = []
+    friends = JSON.stringify({ friends: friends })
+    const sqlstr = 'update user set prefriends = ? where id=?'
+    db.query(sqlstr, [friends, id], function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 更改库存
+            res.send({ data: results, status: 0 })
+        }
+    })
+}
+
+// 获取聊天记录
+exports.getHistory = (req, res) => {
+    const { id } = req.query
+    const sqlstr = 'select * from history where room =?'
+    db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 更改库存
+            res.send({ data: results[0], status: 0 })
+        }
+    })
+}
+// 获取聊天记录
+exports.addHistory = (req, res) => {
+    const { id, text } = req.body
+    let textHistory = []
+    const sqlstr = 'select * from history where room =?'
+    db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 没有过来哦聊记录
+            if (!results[0]) {
+                textHistory.push(text)
+                textHistory = JSON.stringify(textHistory)
+
+                const sqlstr = 'insert into history (textHistory,room) values(?,?)'
+                db.query(sqlstr, [textHistory, id], function (err, results) {
+                    if (err) {
+                        return res.send({ status: 1, message: err.message })
+                    }
+                    else {
+                        // 更改库存
+                        res.send({ data: results, status: 0 })
+                    }
+                })
+            } else {
+                textHistory = JSON.parse(results[0].textHistory)
+                textHistory.push(text)
+
+                textHistory = JSON.stringify(textHistory)
+
+                const sqlstr = 'update history set textHistory = ? where room=?'
+                db.query(sqlstr, [textHistory, id], function (err, results) {
+                    if (err) {
+                        return res.send({ status: 1, message: err.message })
+                    }
+                    else {
+                        // 更改库存
+                        res.send({ data: results, status: 0 })
+                    }
+                })
+            }
+
 
         }
     })

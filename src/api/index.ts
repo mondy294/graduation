@@ -91,6 +91,31 @@ export const getUserInfo = (params: any) => {
         params,
     })
 }
+// 删除好友
+export const cancleFriend = (data: any) => {
+    return requests({
+        url: '/cancleFriend',
+        method: 'post',
+        data,
+    })
+}
+
+// 获取聊天记录
+export const getHistory = (params: any) => {
+    return requests({
+        url: '/getHistory',
+        method: 'get',
+        params,
+    })
+}
+// 获取聊天记录
+export const addHistory = (data: any) => {
+    return requests({
+        url: '/addHistory',
+        method: 'post',
+        data,
+    })
+}
 
 
 

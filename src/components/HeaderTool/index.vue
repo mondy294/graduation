@@ -9,6 +9,7 @@
                     <div v-if="item.icon" class="toolIcon iconfont" v-html="item.icon"></div>
                     <img v-else class="toolIcon" :src="item.image"></img>
                 </el-tooltip>
+                <span class="red" v-if="item.tips == '聊天' && props.flag"></span>
             </div>
 
 
@@ -19,15 +20,20 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { toolList } from '@/assets/index'
+import { ref, defineProps } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
+
+const props = defineProps(['flag'])
 
 const toIcon = (path) => {
     console.log(path);
 
     router.push(path)
 }
+
+
 
 
 </script>
@@ -57,6 +63,7 @@ const toIcon = (path) => {
         padding: 0 20px;
 
         .toolItem {
+            position: relative;
             display: flex;
             align-items: center;
             height: 100%;
@@ -70,6 +77,16 @@ const toIcon = (path) => {
 
             &:hover {
                 background-color: #F1F1F1;
+            }
+
+            .red {
+                position: absolute;
+                right: 5px;
+                top: 10px;
+                width: 8px;
+                height: 8px;
+                border-radius: 4px;
+                background-color: red;
             }
         }
     }

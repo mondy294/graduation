@@ -11,7 +11,7 @@
 
         </div>
         <div class="main_container">
-            <HeaderTool></HeaderTool>
+            <HeaderTool :flag="flag"></HeaderTool>
             <div class="main">
                 <router-view></router-view>
             </div>
@@ -28,10 +28,16 @@ import HeaderTool from '@/components/HeaderTool/index.vue'
 import { layOutList } from '@/assets/index'
 import createWebsocket from '@/api/websocket'
 import { MessageBox } from '@/utils/index'
+import { ref } from 'vue'
 
-import { LOGIN, ADD_FRIEND } from '@/constant'
+
+import { PORT, ADD_FRIEND, LOGIN, FINISH_FRIEND, TEXT } from '@/constant'
 
 const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
+
+
+const flag = ref(false)
+localStorage.setItem('flag', '0')
 
 
 const socket = createWebsocket()
@@ -43,14 +49,65 @@ socket.addEventListener('open', () => {
     socket.send(JSON.stringify(messageBox))
 
 })
+socket.addEventListener('message', async (e) => {
 
-socket.addEventListener('message', (e) => {
-    // const message = JSON.parse(e.data)
+    const message = JSON.parse(e.data)
 
 
-    // console.log('收到服务端信息：' + message.text);
+    // 收到好友请求
+    if (message.type == ADD_FRIEND) {
+        // 获取好友申请
+
+    }
+    // 如果是好友申请通过了
+    else if (message.type == FINISH_FRIEND) {
+
+
+    }
+    else if (message.type == TEXT) {
+        // id排序
+        const idArr = [userInfo.id, message.id]
+        idArr.sort((a, b) => a - b)
+        const id = idArr.join('-')
+
+        const record = {
+            text: message.text || '',
+            sender: message.id,
+            type: message.textType || 'text',
+        }
+        let textHistory = JSON.parse(localStorage.getItem('textHistory'))
+        textHistory = !textHistory ? [] : textHistory
+        console.log(textHistory);
+
+
+        // 如果之前聊过天
+        for (let i = 0; i < textHistory.length; i++) {
+            if (textHistory[i].id == id) {
+                textHistory[i].textList.push(record)
+                // 表示有新信息
+                localStorage.setItem('textHistory', JSON.stringify(textHistory))
+                return
+            }
+        }
+
+        // 如果之前没有记录
+        textHistory.push(
+            {
+                id: id,
+                textList: [record]
+            }
+        )
+        localStorage.setItem('textHistory', JSON.stringify(textHistory))
+
+
+        flag.value = true
+    }
+
+
+
 
 })
+
 
 window.socket = socket
 

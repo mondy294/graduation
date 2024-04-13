@@ -153,28 +153,25 @@ const handleAddFriend = async (index: number, row: TradeRow) => {
     const { sellid } = row
     const res = await getUserInfo({ id: userInfo.id })
     if (res.data.status == 0) {
-        console.log(res.data)
         // 获取当前已有的好友请求
         let { data: { prefriends: currentFriend } } = res.data
-        currentFriend = currentFriend == "null" ? [] : JSON.parse(currentFriend).friends
+        currentFriend = currentFriend == null ? [] : JSON.parse(currentFriend).friends
         // 追加当前请求
-        if (!currentFriend.includes(sellid + '')) {
-            currentFriend.push(sellid + '')
+        if (!currentFriend.includes(userInfo.id + '')) {
+            currentFriend.push(userInfo.id + '')
         }
-
-
-        // 没有text代表时好友请求
-        const messageBox: MessageBox = {
-            id: userInfo.id,
-            targetId: sellid,
-            type: 1
-        }
-        socket.send(JSON.stringify(messageBox))
 
         // 发送好友申请
-        const response = await addFriend({ friends: currentFriend, id: userInfo.id, type: 0 })
+        const response = await addFriend({ friends: currentFriend, id: sellid, type: 0 })
         if (response.data.status == 0) {
             ElMessage.success('请求成功，等待对方通过~')
+            // 没有text代表时好友请求
+            const messageBox: MessageBox = {
+                id: userInfo.id,
+                targetId: sellid,
+                type: 1
+            }
+            socket.send(JSON.stringify(messageBox))
         }
 
 

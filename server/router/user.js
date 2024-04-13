@@ -26,8 +26,15 @@ router.get('/myOrder', userhandle.myOrder)
 router.get('/getFriend', userhandle.getFriend)
 // 加好友
 router.post('/addFriend', userhandle.addFriend)
-// 加好友
+// 加好友/申请
 router.get('/userInfo', userhandle.userInfo)
+// 删除好友/申请
+router.post('/cancleFriend', userhandle.cancleFriend)
+// 获取聊天记录
+router.get('/getHistory', userhandle.getHistory)
+//修改聊天记录
+router.post('/addHistory', userhandle.addHistory)
+
 
 
 
