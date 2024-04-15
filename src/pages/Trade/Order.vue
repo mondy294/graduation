@@ -10,7 +10,6 @@
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="您暂未发布任何商品~">
 
             <el-table-column v-if="orderList.data.length" type="selection" width="55" />
-            <el-table-column v-if="false" type="selection" width="55" />
             <el-table-column label="日期" sortable>
                 <template #default="scope">
                     <div style="display: flex; align-items: center">
@@ -64,7 +63,7 @@ import MonthlyData from '@/components/MonthlyData/index.vue'
 
 const currentPage = ref(1)
 const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
-const loading = ref(false)
+const loading = ref(true)
 
 
 const orderList = reactive({

@@ -108,7 +108,7 @@ export const getHistory = (params: any) => {
         params,
     })
 }
-// 获取聊天记录
+// 更新聊天记录
 export const addHistory = (data: any) => {
     return requests({
         url: '/addHistory',
@@ -116,6 +116,33 @@ export const addHistory = (data: any) => {
         data,
     })
 }
+// 获取契约
+export const getContract = (params: any) => {
+    return requests({
+        url: '/getContract',
+        method: 'get',
+        params,
+    })
+}
+
+// 获取聊天记录
+export const addContract = (data: any) => {
+    return requests({
+        url: '/addContract',
+        method: 'post',
+        data,
+    })
+}
+// 更改库存
+export const editRepertory = (data: any) => {
+    return requests({
+        url: '/buyContract',
+        method: 'post',
+        data,
+    })
+}
+
+
 
 
 

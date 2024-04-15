@@ -98,9 +98,9 @@ async function register(): Promise<void> {
         return
     }
     const userInfo = {
-        account,
-        password,
-        nickname
+        account: account.value,
+        password: password.value,
+        nickname: nickname.value
     }
     loading.value = true
     let res = await Register(userInfo)

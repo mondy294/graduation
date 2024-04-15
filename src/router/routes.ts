@@ -7,6 +7,7 @@ import Trade from '@/pages/Trade/Trade.vue'
 import Products from '@/pages/Trade/Products.vue'
 import Order from '@/pages/Trade/Order.vue'
 import Chat from '@/pages/Chat/Chat.vue'
+import Contract from '@/pages/Contract/Contract.vue'
 
 
 const routes: any[] = [
@@ -88,6 +89,22 @@ const routes: any[] = [
                 name: 'chat',
                 meta: {
                     pageName: '聊天',
+                    id: [1, 2]
+                }
+            },
+        ]
+    },
+    {
+        path: '/home/contract',
+        name: 'contract',
+        component: Home,
+        children: [
+            {
+                path: 'details',
+                component: Contract,
+                name: 'details',
+                meta: {
+                    pageName: '锲约详情',
                     id: [1, 2]
                 }
             },

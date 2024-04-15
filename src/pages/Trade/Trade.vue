@@ -24,7 +24,7 @@
             </div>
         </div>
         <el-table v-loading="loading" element-loading-text="Loading..."
-            :data="productList.data.slice(10 * (currentPage - 1), 10 * currentPage)" height="1200"
+            :data="productList.data.slice(20 * (currentPage - 1), 20 * currentPage)" height="1000"
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="暂无任何发布~">
             <el-table-column v-if="false" type="selection" width="55" />
             <el-table-column label="日期" sortable>
@@ -81,7 +81,7 @@
             </template>
         </el-dialog>
         <div class="pagination">
-            <el-pagination :page-size="10" :pager-count="10" layout="prev, pager, next" :total="productList.data.length"
+            <el-pagination :page-size="20" layout="prev, pager, next" :total="productList.data.length"
                 v-model:current-page="currentPage" @current-change="currentChange" hide-on-single-page />
         </div>
     </div>
@@ -94,6 +94,7 @@ import { Timer } from '@element-plus/icons-vue'
 import { Trade, Purchase, addFriend, getFriend, getUserInfo } from '@/api/index'
 import { onMounted, reactive, ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
+import { PORT, ADD_FRIEND, LOGIN, FINISH_FRIEND, TEXT, REPERTORY } from '@/constant'
 
 import { TradeRow, MessageBox } from '@/utils/index'
 import { getRepertory } from './index'
@@ -103,7 +104,7 @@ const productList = reactive({
     data: []
 })
 
-const copy = []
+let copy = []
 const search = ref('')
 const showSearch = ref(false)
 const nameList = reactive([])
@@ -125,11 +126,35 @@ const currentRepertory = ref(0)
 
 const currentPage = ref(1)
 
-const loading = ref(false)
+const loading = ref(true)
 
 
 const socket = window.socket
 
+
+socket.addEventListener('message', async (e) => {
+
+    const message = JSON.parse(e.data)
+
+
+    if (message.type == REPERTORY) {
+
+        // 更新交易中心
+        let res = await Trade({ id: userInfo.id, page: 'trade' })
+        if (res.data.status == 0) {
+
+
+            const { data }: { data: [] } = res.data
+            // 备份数组
+            copy = data
+            productList.data = data
+        }
+    }
+
+
+
+
+})
 
 onMounted(async () => {
     // 获取当前库存
@@ -241,7 +266,7 @@ const getTrade = async () => {
             // 不展示卖完的商品
             productList.data = data.filter((item: any) => item.remain > 0)
             // 备份数组
-            copy.push(...data)
+            copy = data
             setTimeout(() => {
                 loading.value = false
             }, 500);
@@ -296,6 +321,7 @@ const Buy = async (row: TradeRow, count: number) => {
         await getRepertory(userInfo.id)
         // 重新获取商品信息
         await getTrade()
+        socket.send(JSON.stringify({ type: 4 }))
         ElMessage.success('购买成功')
         handleClose()
 

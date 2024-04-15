@@ -74,7 +74,7 @@
             </template>
         </el-dialog>
         <div class="pagination">
-            <el-pagination :page-size="10" :pager-count="10" layout="prev, pager, next" :total="productList.data.length"
+            <el-pagination :page-size="10" layout="prev, pager, next" :total="productList.data.length"
                 v-model:current-page="currentPage" hide-on-single-page />
         </div>
     </div>
@@ -86,9 +86,9 @@ import { Trade, Cancle, Publish } from '@/api/index'
 import { onMounted, reactive, ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { getRepertory } from './index'
+import { MessageBox } from '@/utils/index'
 
 
-import { TradeRow } from '@/utils/index'
 
 const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
 
@@ -105,10 +105,12 @@ const currentRepertory = ref(0)
 
 const currentPage = ref(1)
 
-const loading = ref(false)
+const loading = ref(true)
+
+const socket = window.socket
 
 onMounted(async () => {
-    currentRepertory.value = JSON.parse(localStorage.getItem('repertory'))
+    currentRepertory.value = await getRepertory(userInfo.id)
 
     // 查询当前账号库存
     await getRepertory(userInfo.id)
@@ -170,6 +172,11 @@ const publish = async () => {
         // 重新拉取数据
         await getProducts()
         await getRepertory(userInfo.id)
+
+        const message: MessageBox = {
+            type: 4
+        }
+        socket.send(JSON.stringify(message))
         ElMessage.success('发布成功')
 
     }

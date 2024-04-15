@@ -34,6 +34,13 @@ router.post('/cancleFriend', userhandle.cancleFriend)
 router.get('/getHistory', userhandle.getHistory)
 //修改聊天记录
 router.post('/addHistory', userhandle.addHistory)
+// 查询契约
+router.get('/getContract', userhandle.getContract)
+//增加/修改
+router.post('/addContract', userhandle.addContract)
+// 修改库存
+router.post('/buyContract', userhandle.buyContract)
+
 
 
 

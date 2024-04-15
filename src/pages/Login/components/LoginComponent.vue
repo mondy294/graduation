@@ -75,8 +75,8 @@ async function login() {
         return
     }
     const userInfo = {
-        account,
-        password
+        account: account.value,
+        password: password.value
     }
 
     loading.value = true

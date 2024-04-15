@@ -17,7 +17,7 @@ const fs = require('fs')
 exports.register = (req, res) => {
 
     const userInfo = req.body
-    const { password: { _value: password }, nickname: { _value: nickname }, account: { _value: account } } = userInfo
+    const { password, nickname, account } = userInfo
     let sql = "select * from user where account=?"
     db.query(sql, [account], function (err, results) {
         //如果查询失败
@@ -50,9 +50,7 @@ exports.register = (req, res) => {
 exports.login = (req, res) => {
 
     const userInfo = req.body
-    console.log(userInfo);
-    const { password: { _value: password }, account: { _value: account } } = userInfo
-    console.log(password, account);
+    const { password, account } = userInfo
     const sqlstr = 'select * from user where account=?'
     db.query(sqlstr, account, function (err, results) {
         if (err || results.length !== 1) {
@@ -249,7 +247,7 @@ exports.getFriend = (req, res) => {
         }
         else {
             // 如果还没有好友
-            if (results[0].friends == 'null') {
+            if (!results[0].friends) {
                 res.send({ data: [], status: 0 })
                 return
             }
@@ -333,7 +331,7 @@ exports.getHistory = (req, res) => {
         }
     })
 }
-// 获取聊天记录
+// 更新聊天记录
 exports.addHistory = (req, res) => {
     const { id, text } = req.body
     let textHistory = []
@@ -375,8 +373,60 @@ exports.addHistory = (req, res) => {
                     }
                 })
             }
-
-
         }
     })
 }
+
+// 查询契约
+exports.getContract = (req, res) => {
+    const { id } = req.query
+    const sqlstr = `select * from contract where sellid =${id} or buyid=${id}`
+    db.query(sqlstr, id, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+
+            res.send({ data: results, status: 0 })
+        }
+    })
+}
+// 新增/修改  契约
+exports.addContract = (req, res) => {
+    const { id, count, sellid, buyid, date, content, seller, buyer } = req.body
+    // 代表修改状态
+    if (!count) {
+        const sqlstr = `update contract set status=1 where id=?`
+        db.query(sqlstr, id, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+    // 代表新增记录
+    else {
+        const sqlstr = `insert into contract (sellid,buyid,count,content,date,seller, buyer) values(?,?,?,?,?,?,?)`
+        db.query(sqlstr, [sellid, buyid, count, content, date, seller, buyer], function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+
+}
+
+// 通过契约转让
+exports.buyContract = async (req, res) => {
+    const { id, count } = req.body
+    await EditRepertory(count, id, res)
+
+}
+

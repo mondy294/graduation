@@ -6,6 +6,27 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "783687",
+      "name": "确认合同 确认 合同 确定",
+      "font_class": "querenhetongquerenhetongqueding",
+      "unicode": "e690",
+      "unicode_decimal": 59024
+    },
+    {
+      "icon_id": "18267920",
+      "name": "合同",
+      "font_class": "hetong",
+      "unicode": "e98f",
+      "unicode_decimal": 59791
+    },
+    {
+      "icon_id": "39890312",
+      "name": "流程审批",
+      "font_class": "liuchengshenpi",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
       "icon_id": "34672835",
       "name": "购买",
       "font_class": "goumai",

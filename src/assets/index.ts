@@ -45,17 +45,13 @@ const layOutList: LayOutList = [
         ]
     },
     {
-        text: 'Dashboard',
-        path: '/dashboard',
+        text: '契约管理中心',
+        path: '/contract',
         children: [
             {
-                text: '分析页',
-                path: '/analysis'
+                text: '契约详情',
+                path: '/details'
             },
-            {
-                text: '工作页',
-                path: '/workbench'
-            }
         ]
     },
 

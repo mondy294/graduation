@@ -1,5 +1,5 @@
 const ws = require('nodejs-websocket')
-const { LOGIN, ADD_FRIEND, TEXT } = require('./constant')
+const { LOGIN, ADD_FRIEND, TEXT, REPERTORY, CONTRACT, REFRESH_CONTRACT } = require('./constant')
 const InitWebsocket = () => {
     const server = ws.createServer((connect) => {
         console.log('新用户连接');
@@ -14,6 +14,12 @@ const InitWebsocket = () => {
             else if (data.type == ADD_FRIEND) {
                 sendTo(server, data)
             } else if (data.type == TEXT) {
+                sendTo(server, data)
+            } else if (data.type == REPERTORY) {
+                sendTo(server, data)
+            } else if (data.type == CONTRACT) {
+                sendTo(server, data)
+            } else if (data.type == REFRESH_CONTRACT) {
                 sendTo(server, data)
             }
 
@@ -35,15 +41,22 @@ const sendTo = (server, message) => {
     const actions = {
         '1': friendAsk,
         '3': friendAsk,
+        '4': sendAll,
+        '5': friendAsk,
+        '6': friendAsk,
     }
     return actions[message.type](server, message)
 }
 function friendAsk(server, message) {
-
     server.connections.forEach(connect => {
         if (connect.id == message.targetId) {
             connect.send(JSON.stringify(message))
         }
+    });
+}
+const sendAll = (server, message) => {
+    server.connections.forEach(connect => {
+        connect.send(JSON.stringify(message))
     });
 }
 

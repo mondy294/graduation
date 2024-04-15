@@ -11,7 +11,7 @@
 
         </div>
         <div class="main_container">
-            <HeaderTool :flag="flag"></HeaderTool>
+            <HeaderTool :flag="flag" @changeFlat="changeFlat"></HeaderTool>
             <div class="main">
                 <router-view></router-view>
             </div>
@@ -39,6 +39,10 @@ const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
 const flag = ref(false)
 localStorage.setItem('flag', '0')
 
+const changeFlat = () => {
+    flag.value = !flag.value
+}
+
 
 const socket = createWebsocket()
 socket.addEventListener('open', () => {
@@ -54,6 +58,7 @@ socket.addEventListener('message', async (e) => {
     const message = JSON.parse(e.data)
 
 
+
     // 收到好友请求
     if (message.type == ADD_FRIEND) {
         // 获取好友申请
@@ -65,39 +70,6 @@ socket.addEventListener('message', async (e) => {
 
     }
     else if (message.type == TEXT) {
-        // id排序
-        const idArr = [userInfo.id, message.id]
-        idArr.sort((a, b) => a - b)
-        const id = idArr.join('-')
-
-        const record = {
-            text: message.text || '',
-            sender: message.id,
-            type: message.textType || 'text',
-        }
-        let textHistory = JSON.parse(localStorage.getItem('textHistory'))
-        textHistory = !textHistory ? [] : textHistory
-        console.log(textHistory);
-
-
-        // 如果之前聊过天
-        for (let i = 0; i < textHistory.length; i++) {
-            if (textHistory[i].id == id) {
-                textHistory[i].textList.push(record)
-                // 表示有新信息
-                localStorage.setItem('textHistory', JSON.stringify(textHistory))
-                return
-            }
-        }
-
-        // 如果之前没有记录
-        textHistory.push(
-            {
-                id: id,
-                textList: [record]
-            }
-        )
-        localStorage.setItem('textHistory', JSON.stringify(textHistory))
 
 
         flag.value = true

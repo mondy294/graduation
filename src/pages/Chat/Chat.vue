@@ -4,7 +4,7 @@
             <div class="search">
                 <div class="friend-apply">
                     <span @click="panelShow = !panelShow" class="iconfont friend-ask">&#xe604;</span>
-                    <span v-if="friendAsk.data.length" class="tips"></span>
+                    <span v-if="friendAskList.data.length" class="tips"></span>
                 </div>
             </div>
             <div class="friends" v-show="friendList.data.length && panelShow">
@@ -17,7 +17,11 @@
                             {{ item.nickname }}
                         </div>
                         <div class="message">
-                            {{ '你好我是sqy' }}
+                            <div class="text" v-if="item.newMessage">
+                                {{ item.newMessage }}
+                                <span>1</span>
+                            </div>
+                            <div class="text" v-else>你好我是{{ item.nickname }}</div>
                         </div>
                     </div>
                 </div>
@@ -49,7 +53,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, computed } from 'vue';
 import { getFriend, getUserInfo, addFriend, cancleFriend, getHistory, addHistory } from '@/api/index'
-import { PORT, ADD_FRIEND, LOGIN, FINISH_FRIEND, TEXT } from '@/constant'
+import { PORT, ADD_FRIEND, LOGIN, FINISH_FRIEND, TEXT, CONTRACT } from '@/constant'
 import { ElMessage } from 'element-plus';
 import { TradeRow, MessageBox } from '@/utils/index'
 import ChatBox from '@/components/ChatBox/index.vue'
@@ -82,7 +86,6 @@ const socket = window.socket
 socket.addEventListener('message', async (e) => {
 
     const message = JSON.parse(e.data)
-
     // 收到好友请求
     if (message.type == ADD_FRIEND) {
         // 获取好友申请
@@ -97,14 +100,24 @@ socket.addEventListener('message', async (e) => {
         // 获取好友列表
         await getFriendList()
 
-    } else if (message.type == TEXT) {
+    } else if (message.type == TEXT || message.type == CONTRACT) {
+
+        // 获取好友列表
+        await getFriendList()
         // 如果当前正好停留在与此人的聊天页面那么更新数据
         if (member.person.id == message.id) {
             history.data.push(message)
+
         }
         // 是其他人发来的信息
         else {
+            friendList.data.forEach((item) => {
+                if (item.id == message.id) {
+                    item.newMessage = message.text
+                    return
+                }
 
+            })
         }
 
     }
@@ -128,6 +141,8 @@ onMounted(async () => {
     await gethistory(member.person)
 })
 const gethistory = async (item: any) => {
+    if (!item) return
+
     // id排序
     const idArr = [userInfo.id, item.id]
     idArr.sort((a, b) => a - b)
@@ -146,6 +161,10 @@ const gethistory = async (item: any) => {
 
 }
 
+// 获取最后一条信息
+const getNewMessage = (id: number) => {
+
+}
 
 // 去聊天
 const toFriend = async (item: any) => {
@@ -170,9 +189,10 @@ const getFriendList = async () => {
 const getFriendAsk = async () => {
     const res = await getUserInfo({ id: userInfo.id })
     if (res.data.status === 0) {
+
         // 获取该账号的所有申请
         const { data: { prefriends } } = res.data
-        friendAsk.data = prefriends == 'null' ? [] : JSON.parse(prefriends).friends
+        friendAsk.data = prefriends == null ? [] : JSON.parse(prefriends).friends
     }
 }
 // 获取好友申请列表
@@ -216,7 +236,7 @@ const agree = async (item: any) => {
                 // 获取当前已有的好友
                 let { friends: currentFriend } = item
                 // 获取当前已有的好友申请
-                currentFriend = currentFriend == "null" ? [] : JSON.parse(currentFriend).friends
+                currentFriend = currentFriend == null ? [] : JSON.parse(currentFriend).friends
 
                 if (!currentFriend.includes(targetId + '')) {
                     currentFriend.push(targetId + '')
@@ -268,16 +288,7 @@ const agree = async (item: any) => {
                 }
             }
 
-
-
-
-
-
-
         });
-
-
-
     }
 
 
@@ -391,8 +402,29 @@ const refuse = async (item: any) => {
                     }
 
                     .message {
+                        width: 100%;
+                        display: flex;
+                        align-items: center;
                         line-height: 30px;
                         text-align: start;
+
+                        .text {
+                            width: 100%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+
+                            span {
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 10px;
+                                width: 20px;
+                                height: 20px;
+                                background-color: red;
+                                color: #fff;
+                            }
+                        }
                     }
 
                     .choose {
