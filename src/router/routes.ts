@@ -9,6 +9,8 @@ import Order from '@/pages/Trade/Order.vue'
 import Chat from '@/pages/Chat/Chat.vue'
 import Contract from '@/pages/Contract/Contract.vue'
 
+import Panel from '@/pages/Panel/Panel.vue'
+
 
 const routes: any[] = [
     {
@@ -105,7 +107,23 @@ const routes: any[] = [
                 name: 'details',
                 meta: {
                     pageName: '锲约详情',
-                    id: [1, 2]
+                    id: [3, 0]
+                }
+            },
+        ]
+    },
+    {
+        path: '/home/market',
+        name: 'market',
+        component: Home,
+        children: [
+            {
+                path: 'Panel',
+                component: Panel,
+                name: 'Panel',
+                meta: {
+                    pageName: '行情面板',
+                    id: [2, 0]
                 }
             },
         ]

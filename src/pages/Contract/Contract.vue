@@ -84,7 +84,7 @@
             </div>
             <template #footer>
                 <div v-if="contract.status == 0" class="dialog-footer">
-                    <el-button @click="confirm('cancle')">取消</el-button>
+                    <el-button type="danger" @click="confirm('cancle')">驳回申请</el-button>
                     <el-button type="primary" @click="confirm('confirm')">
                         审核通过
                     </el-button>
@@ -142,13 +142,21 @@ onMounted(async () => {
     await getMyContract()
 })
 
-const cellState = ({ columnIndex }) => {
-    if (columnIndex == 4) {
-        // 超出省略
-        return {
-            textOverflow: 'ellipsos',
-            overflow: 'hidden',
+const cellState = ({ columnIndex, row }) => {
+    if (columnIndex == 5) {
+        if (row.status == 1) {
+            return {
+                color: 'green'
+            }
         }
+        else if (row.status == 0) { }
+        else {
+            return {
+                color: 'red'
+            }
+        }
+
+
     }
 
 }
@@ -176,11 +184,17 @@ const getState = (row: any) => {
         } else {
             return '等待您审核'
         }
-    } else {
+    } else if (row.status == 1) {
         if (row.sellid == userInfo.id) {
             return '审核通过'
         } else {
             return '审核通过'
+        }
+    } else {
+        if (row.sellid == userInfo.id) {
+            return '对方已拒绝'
+        } else {
+            return '您已拒绝'
         }
     }
 }
@@ -192,11 +206,11 @@ const check = (row: any) => {
 const confirm = async (type: string) => {
     switch (type) {
         case ('cancle'):
-            handleClose()
+            await changeContractStatus(-1)
             break
         case ('confirm'):
             // 更改状态
-            await changeContractStatus()
+            await changeContractStatus(1)
             await fiveForFree()
             break
     }
@@ -207,14 +221,20 @@ const handleClose = () => {
 
 }
 
-const changeContractStatus = async () => {
+const changeContractStatus = async (status: number) => {
     const id = contract.id
-    const res = await addContract({ id })
+    const res = await addContract({ id, status })
     if (res.data.status == 0) {
         const { data } = res.data
         handleClose()
         await getMyContract()
-        ElMessage.success('审核通过！')
+        if (status == 1) {
+            ElMessage.success('审核已通过！')
+        }
+        else {
+            ElMessage.error('审核已驳回！')
+        }
+
 
     }
 }

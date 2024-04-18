@@ -77,8 +77,6 @@ exports.login = (req, res) => {
     })
 
 }
-
-
 exports.trade = (req, res) => {
     const { id, page } = req.query
     // 如果是交易中心页面发来的请求
@@ -193,8 +191,38 @@ exports.repertory = (req, res) => {
 // 查询我的订单
 exports.myOrder = (req, res) => {
     const { buyid } = req.query
-    const sqlstr = 'select * from orderlist where buyid= ?'
-    db.query(sqlstr, buyid, function (err, results) {
+    if (buyid) {
+        const sqlstr = 'select * from orderlist where buyid= ?'
+        db.query(sqlstr, buyid, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+    else {
+        const sqlstr = 'select * from orderlist'
+        db.query(sqlstr, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+
+
+}
+// 查询商品购买详情
+exports.orderDetails = (req, res) => {
+    const { orderId } = req.query
+    const sqlstr = 'select * from orderlist where orderid= ?'
+    db.query(sqlstr, orderId, function (err, results) {
         if (err) {
             return res.send({ status: 1, message: err.message })
         }
@@ -274,28 +302,42 @@ exports.getFriend = (req, res) => {
 // 获取用户信息
 exports.userInfo = (req, res) => {
     const { id } = req.query
-    let friendStr = ''
-    // 允许一次查询多个
-    const friends = Array.isArray(id) ? id : [id]
-    friends.forEach((item) => {
-        friendStr += item + ','
-    })
-    friendStr = friendStr.substring(0, friendStr.length - 1)
-    const sqlstr = `select  * from user where id in (${friendStr})`
-    db.query(sqlstr, id, function (err, results) {
-        if (err) {
-            return res.send({ status: 1, message: err.message })
-        }
-        else {
-            if (results.length > 1) {
-                res.send({ data: results, status: 0 })
+    if (id) {
+        let friendStr = ''
+        // 允许一次查询多个
+        const friends = Array.isArray(id) ? id : [id]
+        friends.forEach((item) => {
+            friendStr += item + ','
+        })
+        friendStr = friendStr.substring(0, friendStr.length - 1)
+        const sqlstr = `select  * from user where id in (${friendStr})`
+        db.query(sqlstr, id, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
             }
             else {
-                res.send({ data: results[0], status: 0 })
-            }
+                if (results.length > 1) {
+                    res.send({ data: results, status: 0 })
+                }
+                else {
+                    res.send({ data: results[0], status: 0 })
+                }
 
-        }
-    })
+            }
+        })
+    }
+    else {
+        const sqlstr = `select  * from user`
+        db.query(sqlstr, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+
 }
 
 // 删除好友或者好友申请
@@ -393,11 +435,11 @@ exports.getContract = (req, res) => {
 }
 // 新增/修改  契约
 exports.addContract = (req, res) => {
-    const { id, count, sellid, buyid, date, content, seller, buyer } = req.body
+    const { id, count, sellid, buyid, date, content, seller, buyer, status } = req.body
     // 代表修改状态
     if (!count) {
-        const sqlstr = `update contract set status=1 where id=?`
-        db.query(sqlstr, id, function (err, results) {
+        const sqlstr = `update contract set status=? where id=?`
+        db.query(sqlstr, [status, id], function (err, results) {
             if (err) {
                 return res.send({ status: 1, message: err.message })
             }

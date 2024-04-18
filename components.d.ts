@@ -31,6 +31,7 @@ declare module 'vue' {
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     HeaderTool: typeof import('./src/components/HeaderTool/index.vue')['default']
     MonthlyData: typeof import('./src/components/MonthlyData/index.vue')['default']
+    OrderDetail: typeof import('./src/components/OrderDetail/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

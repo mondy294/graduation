@@ -11,7 +11,7 @@
 
             <el-table-column v-if="productList.data.length" type="selection" width="55" />
             <el-table-column v-if="false" type="selection" width="55" />
-            <el-table-column label="日期" sortable>
+            <el-table-column prop="date" label="日期" sortable>
                 <template #default="scope">
                     <div style="display: flex; align-items: center">
                         <el-icon>
@@ -42,7 +42,7 @@
             <el-table-column label="操作">
 
                 <template #default="scope">
-                    <el-button size="small" type="primary" @click="editRow()">编辑</el-button>
+                    <el-button size="small" type="primary" @click="rowDetails(scope.row)">查看详情</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -73,6 +73,12 @@
                 </div>
             </template>
         </el-dialog>
+        <el-dialog v-model="showOrderDetails" title="详情" width="1200" :before-close="closeDetails">
+            <OrderDetail v-if="showOrderDetails" :total="total" :remain="remain" :orderDetails="orderDetails">
+            </OrderDetail>
+
+
+        </el-dialog>
         <div class="pagination">
             <el-pagination :page-size="10" layout="prev, pager, next" :total="productList.data.length"
                 v-model:current-page="currentPage" hide-on-single-page />
@@ -82,11 +88,12 @@
 
 <script setup lang="ts">
 import { Timer } from '@element-plus/icons-vue'
-import { Trade, Cancle, Publish } from '@/api/index'
+import { Trade, Cancle, Publish, getOrderDetails } from '@/api/index'
 import { onMounted, reactive, ref, computed } from 'vue';
 import { ElMessage } from 'element-plus';
 import { getRepertory } from './index'
 import { MessageBox } from '@/utils/index'
+import OrderDetail from '@/components/OrderDetail/index.vue'
 
 
 
@@ -94,12 +101,16 @@ const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
 
 const count = ref(1)
 const price = ref(0)
+const total = ref()
+const remain = ref()
 const selections = reactive({
     data: []
 })
 const productList = reactive({
     data: []
 })
+let orderDetails = reactive({ data: [] })
+const showOrderDetails = ref(false)
 const dialogVisible = ref(false)
 const currentRepertory = ref(0)
 
@@ -108,6 +119,8 @@ const currentPage = ref(1)
 const loading = ref(true)
 
 const socket = window.socket
+
+
 
 onMounted(async () => {
     currentRepertory.value = await getRepertory(userInfo.id)
@@ -119,6 +132,8 @@ onMounted(async () => {
     await getProducts()
 
 })
+
+
 
 const getProducts = async () => {
     loading.value = true
@@ -134,8 +149,23 @@ const getProducts = async () => {
 
 }
 
-const editRow = () => {
+const rowDetails = async (row) => {
+    const res = await getOrderDetails({ orderId: row.id })
+    if (res.data.status == 0) {
+        const { data } = res.data
+        orderDetails.data = data
+        total.value = row.count
+        remain.value = row.remain
 
+        showOrderDetails.value = true
+
+    }
+
+
+
+}
+const closeDetails = () => {
+    showOrderDetails.value = false
 }
 const cancle = async () => {
     if (selections.data.length == 0) {
@@ -210,6 +240,12 @@ const handleClose = () => {
 
 <style scoped lang="scss">
 .container {
+
+    .charts {
+        width: 100%;
+        height: 300px;
+    }
+
     .tool-header {
         width: 100%;
         height: 48px;

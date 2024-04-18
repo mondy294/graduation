@@ -13,13 +13,29 @@
                     <div v-show="fuzzyList.data.length == 0" class="fail">
                         <span>暂无搜索结果</span>
                     </div>
+                    <div class="add-friend">
+                        <div class="friend" v-for="(item, index) in AddUserList.data" :key="index">
+                            <div class="avatar">
+                                <img :src="PORT + item.user_pic" alt="">
+                            </div>
+                            <div class="abstract">
+                                <span class="name">
+                                    {{ item.nickname }}
+                                </span>
+                                <span @mousedown="handleAddFriend($event, item)"
+                                    v-if="!friends.data.includes(item.id + '')" class="iconfont">&#xe608;</span>
+                                <span class="already" v-else>已是好友</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- <div class="count">
                 预购买数量:
                 <el-input-number v-model="count" :min="1" :max="10" @change="handleCountChange" />
             </div> -->
-            <div class="smartBuy">
+
+            <div class="right-tool">
                 <el-button type="primary" @click="smartChoose">智能选择</el-button>
             </div>
         </div>
@@ -27,7 +43,7 @@
             :data="productList.data.slice(20 * (currentPage - 1), 20 * currentPage)" height="1000"
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="暂无任何发布~">
             <el-table-column v-if="false" type="selection" width="55" />
-            <el-table-column label="日期" sortable>
+            <el-table-column prop="date" label="日期" sortable>
                 <template #default="scope">
                     <div style="display: flex; align-items: center">
                         <el-icon>
@@ -57,8 +73,7 @@
 
                 <template #default="scope">
                     <el-button size="small" type="primary" @click="handleBuy(scope.$index, scope.row)">购买</el-button>
-                    <el-button size="small" type="primary"
-                        @click="handleAddFriend(scope.$index, scope.row)">加好友</el-button>
+                    <el-button size="small" type="primary" @click="handleAddFriend($event, scope.row)">加好友</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -128,6 +143,9 @@ const currentPage = ref(1)
 
 const loading = ref(true)
 
+let userlist = []
+const AddUserList = reactive({ data: [] })
+const friends = reactive({ data: [] })
 
 const socket = window.socket
 
@@ -157,6 +175,8 @@ socket.addEventListener('message', async (e) => {
 })
 
 onMounted(async () => {
+    await getAllUser()
+    userlist = userlist.filter((item) => item.id != userInfo.id)
     // 获取当前库存
     currentRepertory.value = JSON.parse(localStorage.getItem('repertory'))
     // 获取商品列表
@@ -174,8 +194,9 @@ const handleBuy = (index: number, row: any) => {
     totalMoney.value = row.price
 }
 // 发送好友请求
-const handleAddFriend = async (index: number, row: TradeRow) => {
-    const { sellid } = row
+const handleAddFriend = async (e: MouseEvent, row: TradeRow) => {
+    let { sellid } = row
+    sellid = sellid ? sellid : row.id
     const res = await getUserInfo({ id: userInfo.id })
     if (res.data.status == 0) {
         // 获取当前已有的好友请求
@@ -199,12 +220,7 @@ const handleAddFriend = async (index: number, row: TradeRow) => {
             socket.send(JSON.stringify(messageBox))
         }
 
-
-
-
     }
-
-
 }
 // 模糊搜索
 const searchChange = () => {
@@ -222,8 +238,22 @@ const searchChange = () => {
     let target = nameList.filter((item: string) => {
         return item.includes(search.value)
     })
+    let targetUser = userlist.filter((item) => {
+        return item.nickname.includes(search.value)
+    })
+    AddUserList.data = [...targetUser]
+
     fuzzyList.data = [...target]
 
+}
+// 获取好友
+const getFriendList = async () => {
+    const res = await getUserInfo({ id: userInfo.id })
+    if (res.data.status === 0) {
+        // 获取该账号的所有申请
+        const { data } = res.data
+        friends.data = data == null ? [] : JSON.parse(data.friends).friends
+    }
 }
 // 获取卖家名单
 const getNameList = (() => {
@@ -245,10 +275,12 @@ const filterProduct = (seller: string) => {
 const searchBlur = () => {
     showSearch.value = false
 }
-const searchFocus = () => {
+const searchFocus = async () => {
     if (search.value != '') {
         showSearch.value = true
     }
+    await getFriendList()
+
 }
 
 // 清空筛选条件
@@ -282,6 +314,15 @@ const getTrade = async () => {
 // 智能选择
 const smartChoose = () => {
 
+}
+const getAllUser = async () => {
+    const res = await getUserInfo()
+    if (res.data.status == 0) {
+        const { data } = res.data
+        userlist = data
+
+
+    }
 }
 
 
@@ -401,11 +442,88 @@ const currentChange = (page) => {
                     min-height: 190px;
                     color: gray;
                 }
+
+                .add-friend {
+                    width: 100%;
+
+                    .friend {
+                        width: 100%;
+                        height: 60px;
+                        border-bottom: 1px solid #eee;
+                        cursor: pointer;
+
+                        .avatar {
+                            float: left;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            width: 60px;
+                            height: 100%;
+
+                            img {
+                                border-radius: 25px;
+                                width: 50px;
+                                height: 50px;
+                                background-color: blue;
+                            }
+
+                        }
+
+                        .abstract {
+                            overflow: hidden;
+                            height: 100%;
+                            padding: 0 10px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+
+                            .name {
+                                max-width: 180px;
+                                text-overflow: ellipsis;
+                                overflow: hidden;
+                            }
+
+                            .iconfont {
+
+                                font-size: 24px;
+                                transition: all 0.2s;
+
+                                &:hover {
+                                    color: #0960BD;
+                                }
+                            }
+
+                            .already {
+                                font-size: 14px;
+                                color: gray;
+                            }
+
+
+
+                        }
+                    }
+                }
             }
         }
 
         .count {
             color: gray;
+        }
+
+        .right-tool {
+            display: flex;
+            align-items: center;
+
+            .search-friend {
+                margin-right: 20px;
+                font-size: 24px;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    color: #0960BD;
+                }
+            }
         }
     }
 

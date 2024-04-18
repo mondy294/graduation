@@ -10,7 +10,7 @@
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="您暂未发布任何商品~">
 
             <el-table-column v-if="orderList.data.length" type="selection" width="55" />
-            <el-table-column label="日期" sortable>
+            <el-table-column prop="date" label="日期" sortable>
                 <template #default="scope">
                     <div style="display: flex; align-items: center">
                         <el-icon>
@@ -81,6 +81,7 @@ const getMyOrder = async () => {
 
     if (res.data.status == 0) {
         const { data } = res.data
+
         orderList.data = data
 
         setTimeout(() => {

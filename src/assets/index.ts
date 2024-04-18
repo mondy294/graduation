@@ -72,6 +72,11 @@ const toolList: ToolList = [
         icon: '&#xe68d;',
         tips: '聊天',
         path: '/home/chat'
+    },
+    {
+        icon: '&#xe68d;',
+        tips: '聊天',
+        path: '/home/chat'
     }
 ]
 
@@ -144,7 +149,25 @@ const chartList: any = [
                         color: '#90D2FD',
                         opacity: 0.5
                     }
-                }
+                },
+                {
+                    data: [100, 932, 901, 934, 1290, 1330, 1320],
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        color: '#90D2FD',
+                        opacity: 0.5
+                    }
+                },
+                {
+                    data: [1232, 932, 901, 934, 1290, 1330, 1320],
+                    type: 'line',
+                    smooth: true,
+                    areaStyle: {
+                        color: '#90D2FD',
+                        opacity: 0.5
+                    }
+                },
             ]
         }
     },

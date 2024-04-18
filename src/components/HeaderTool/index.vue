@@ -57,7 +57,7 @@ socket.addEventListener('message', async (e) => {
 
     const message = JSON.parse(e.data)
 
-    if (message.type == 6) {
+    if (message.type == 6 || message.type == 4) {
         // 刷新契约状态
         repertory.value = await getRepertory(userInfo.id)
 
@@ -114,6 +114,7 @@ const action = (item: string) => {
     .right {
         display: flex;
         align-items: center;
+        height: 100%;
 
         .repertory {
             color: gray;
@@ -135,7 +136,6 @@ const action = (item: string) => {
                 transition: all 0.3s;
 
                 .toolIcon {
-
                     font-size: 16px
                 }
 

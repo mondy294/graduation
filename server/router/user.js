@@ -22,6 +22,8 @@ router.post('/publish', userhandle.publish)
 router.get('/repertory', userhandle.repertory)
 // 查询我的购买记录
 router.get('/myOrder', userhandle.myOrder)
+// 查询商品购买详情
+router.get('/orderDetails', userhandle.orderDetails)
 // 获取好友列表
 router.get('/getFriend', userhandle.getFriend)
 // 加好友
