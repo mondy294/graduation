@@ -70,7 +70,7 @@ exports.login = (req, res) => {
                     status: 0,
                     message: '登陆成功',
                     token: 'Bearer ' + tokenStr,
-                    user: { id: user.id, user_pic: user.user_pic, nickname: user.nickname, repertory: user.repertory }
+                    user: { id: user.id, user_pic: user.user_pic, nickname: user.nickname, repertory: user.repertory, authority: user.authority }
                 })
             }
         }
@@ -79,6 +79,17 @@ exports.login = (req, res) => {
 }
 exports.trade = (req, res) => {
     const { id, page } = req.query
+    if (!id) {
+        const sqlstr = 'select * from trade '
+        db.query(sqlstr, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                res.send({ data: results, status: 0, message: '获取成功' })
+            }
+        })
+    }
     // 如果是交易中心页面发来的请求
     if (page == 'trade') {
         const sqlstr = 'select * from trade where sellid!=?'
@@ -190,7 +201,7 @@ exports.repertory = (req, res) => {
 
 // 查询我的订单
 exports.myOrder = (req, res) => {
-    const { buyid } = req.query
+    const { buyid, sellid } = req.query
     if (buyid) {
         const sqlstr = 'select * from orderlist where buyid= ?'
         db.query(sqlstr, buyid, function (err, results) {
@@ -203,7 +214,20 @@ exports.myOrder = (req, res) => {
             }
         })
     }
+    else if (sellid) {
+        const sqlstr = 'select * from orderlist where sellid= ?'
+        db.query(sqlstr, sellid, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
     else {
+
         const sqlstr = 'select * from orderlist'
         db.query(sqlstr, function (err, results) {
             if (err) {
@@ -470,5 +494,41 @@ exports.buyContract = async (req, res) => {
     const { id, count } = req.body
     await EditRepertory(count, id, res)
 
+}
+// 修改用户信息
+exports.updateUserInfo = (req, res) => {
+    const { type } = req.body
+    const actions = {
+        'cancle': cancle,
+        'update': update
+    }
+    return actions[type](req.body)
+
+    function cancle(obj) {
+        const { id } = obj
+        const sqlstr = 'delete from user where id=?'
+        db.query(sqlstr, id, function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
+    function update(obj) {
+        const { password, id } = obj
+        const sqlstr = 'update user set password = ? where id=?'
+        db.query(sqlstr, [password, id], function (err, results) {
+            if (err) {
+                return res.send({ status: 1, message: err.message })
+            }
+            else {
+                // 更改库存
+                res.send({ data: results, status: 0 })
+            }
+        })
+    }
 }
 

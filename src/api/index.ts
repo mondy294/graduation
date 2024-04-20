@@ -149,6 +149,14 @@ export const editRepertory = (data: any) => {
         data,
     })
 }
+// 更改用户信息
+export const updateUserInfo = (data: any) => {
+    return requests({
+        url: '/updateUserInfo',
+        method: 'post',
+        data,
+    })
+}
 
 
 

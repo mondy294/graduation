@@ -12,6 +12,7 @@ import 'element-plus/theme-chalk/el-message.css';
 // 数字自增
 import AnimatedNumber from 'animated-number-vue3'
 
+
 // 引入 echarts
 import * as echarts from 'echarts'
 

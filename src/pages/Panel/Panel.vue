@@ -61,38 +61,110 @@ import { log } from 'echarts/types/src/util/log.js';
 const OrderData = reactive({ data: [] })
 const currentPage = ref(1)
 const loading = ref(true)
-
-const data = reactive([900, 345, 393, -108, -154, 135, 178, 286, -119, -361, -203, 900, 345, 393, -108, -154, 135, 178, 286, -119, -361, -203, 900, 345, 393, -108, -154, 135, 178, 286,])
-
 // 通过 internalInstance.appContext.config.globalProperties 获取全局属性或方法
-
-const help = [];
-const positive = [];
-const negative = [];
 let internalInstance = getCurrentInstance();
 let echarts = internalInstance.appContext.config.globalProperties.$echarts;
-for (var i = 0, sum = 0; i < data.length; ++i) {
-    if (data[i] >= 0) {
-        positive.push(data[i]);
-        negative.push('-');
-    } else {
-        positive.push('-');
-        negative.push(-data[i]);
-    }
 
-    if (i === 0) {
-        help.push(0);
-    } else {
-        sum += data[i - 1];
-        if (data[i] < 0) {
-            help.push(sum + data[i]);
-        } else {
-            help.push(sum);
-        }
-    }
-}
 onMounted(async () => {
     OrderData.data = await initChart()
+})
+
+const initChart = async () => {
+    const map = new Map()
+    const res = await MyOrder()
+    if (res.data.status == 0) {
+        setTimeout(() => {
+            loading.value = false
+        }, 500);
+        const { data } = res.data
+        data.forEach((item) => {
+            let date = item.date.split(' ')[0]
+            if (!map.has(date)) {
+                map.set(date, { price: [item.price], count: item.count, total: item.totalmoney })
+            }
+            else {
+                let today = map.get(date)
+                today.price.push(item.price)
+                today.count += item.count
+                today.total += item.totalmoney
+            }
+        })
+
+
+        const final = Array.from(map.keys())
+        const chartData = []
+        const market = final.map((item, idx) => {
+            const info = map.get(item)
+            // 开盘收盘
+            const open = info.price[0]
+            const over = info.price[info.price.length - 1]
+            chartData.push(over)
+            let updown
+            // 涨跌
+            if (idx >= 1) {
+                // 前一天收盘价
+                const befor = map.get(final[idx - 1]).price[map.get(final[idx - 1]).price.length - 1]
+                updown = (over - befor) / befor
+            }
+            else {
+                updown = 0.01
+            }
+            updown = (updown * 100).toFixed(2)
+
+            let arr = info.price.sort((a, b) => a - b)
+            return {
+                date: item,
+                open,
+                over,
+                updown,
+                low: arr[0],
+                high: arr[arr.length - 1],
+                count: info.count,
+                total: info.total,
+                amplitude: (arr[arr.length - 1] / arr[0]).toFixed(2)
+            }
+        })
+
+        // 计算最终瀑布图的数据
+        const finalData = chartData.map((item, idx) => {
+            if (idx == 0) return item
+            else return item - chartData[idx - 1]
+        })
+
+        market.reverse()
+        inintData(finalData)
+        return market
+    }
+}
+
+
+// 初始化图表数据
+const inintData = (data) => {
+    const help = [];
+    const positive = [];
+    const negative = [];
+
+
+    for (var i = 0, sum = 0; i < data.length; ++i) {
+        if (data[i] >= 0) {
+            positive.push(data[i]);
+            negative.push('-');
+        } else {
+            positive.push('-');
+            negative.push(-data[i]);
+        }
+
+        if (i === 0) {
+            help.push(0);
+        } else {
+            sum += data[i - 1];
+            if (data[i] < 0) {
+                help.push(sum + data[i]);
+            } else {
+                help.push(sum);
+            }
+        }
+    }
     var myChart = echarts.init(document.getElementById('chart'));
     const option = {
         grid: {
@@ -107,7 +179,7 @@ onMounted(async () => {
             splitLine: { show: false },
             data: (function () {
                 var list = [];
-                for (var i = 1; i <= 30; i++) {
+                for (var i = 1; i <= data.length; i++) {
                     list.push('Oct/' + i);
                 }
                 return list;
@@ -154,65 +226,6 @@ onMounted(async () => {
         ]
     };
     myChart.setOption(option)
-})
-
-const initChart = async () => {
-    const map = new Map()
-    const res = await MyOrder()
-    if (res.data.status == 0) {
-        setTimeout(() => {
-            loading.value = false
-        }, 500);
-        const { data } = res.data
-        data.forEach((item) => {
-            let date = item.date.split(' ')[0]
-            if (!map.has(date)) {
-                map.set(date, { price: [item.price], count: item.count, total: item.totalmoney })
-            }
-            else {
-                let today = map.get(date)
-                today.price.push(item.price)
-                today.count += item.count
-                today.total += item.totalmoney
-            }
-        })
-
-        console.log(map);
-        const final = Array.from(map.keys())
-        const market = final.map((item, idx) => {
-            const info = map.get(item)
-            // 开盘收盘
-            const open = info.price[0]
-            const over = info.price[info.price.length - 1]
-            let updown
-            // 涨跌
-            if (idx >= 1) {
-                // 前一天收盘价
-                const befor = map.get(final[idx - 1]).price[map.get(final[idx - 1]).price.length - 1]
-                updown = (over - befor) / befor
-            }
-            else {
-                updown = 0.01
-            }
-            updown = (updown * 100).toFixed(2)
-
-            let arr = info.price.sort((a, b) => a - b)
-            return {
-                date: item,
-                open,
-                over,
-                updown,
-                low: arr[0],
-                high: arr[arr.length - 1],
-                count: info.count,
-                total: info.total,
-                amplitude: (arr[arr.length - 1] / arr[0]).toFixed(2)
-            }
-        })
-        market.reverse()
-
-        return market
-    }
 }
 
 </script>

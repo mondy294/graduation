@@ -7,7 +7,7 @@
                 <img src="../../assets//logo-C4i4nT_7.png" alt="">
                 <div class="title">供应链碳配额协同系统</div>
             </div>
-            <Collapse :layOutList="layOutList"></Collapse>
+            <Collapse :layOutList="collpaseList"></Collapse>
 
         </div>
         <div class="main_container">
@@ -25,7 +25,7 @@
 import { reactive } from 'vue'
 import Collapse from '@/components/Collapse/index.vue'
 import HeaderTool from '@/components/HeaderTool/index.vue'
-import { layOutList } from '@/assets/index'
+import { layOutList, adminLayOutList } from '@/assets/index'
 import createWebsocket from '@/api/websocket'
 import { MessageBox } from '@/utils/index'
 import { ref } from 'vue'
@@ -35,6 +35,7 @@ import { PORT, ADD_FRIEND, LOGIN, FINISH_FRIEND, TEXT } from '@/constant'
 
 const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
 
+const collpaseList = userInfo.authority == 1 ? adminLayOutList : layOutList
 
 const flag = ref(false)
 localStorage.setItem('flag', '0')

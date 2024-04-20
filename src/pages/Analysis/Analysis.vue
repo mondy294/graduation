@@ -1,18 +1,19 @@
 <template>
     <div class="container">
         <div class="showData">
-            <div class="dataPart" v-for="(item, index) in dataList" :key="index">
+            <div class="dataPart" v-for="(item, index) in dataList.data" :key="index">
                 <div class="header">
                     <span>{{ item.title }}</span>
                     <span class="date" :style="{ color: item.datacolor, backgroundColor: item.datacolor + '0D' }">{{
-                item.date }}</span>
+                        item.date }}</span>
                 </div>
                 <div class="screen">
                     <div class="screen-data">
-                        <span>
-                            <AnimatedNumber :from="0" :to="item.data"></AnimatedNumber>
+                        <span v-if="Number.isInteger(item.data)">
+                            <AnimatedNumber class="number" :from="0" :to="item.data"></AnimatedNumber>
                         </span>
-                        <span>{{ item.data }}</span>
+                        <span class="number" v-else>{{ item.data }}%</span>
+                        <span v-html="item.logo" :style="{ color: item.color }" class="iconfont"></span>
                     </div>
                     <div class="screen-data">
                         <span>{{ item.subtitle }}</span>
@@ -28,7 +29,7 @@
             <!-- 标签头 -->
             <div class="tabs-container">
                 <el-tabs v-model="activeName" class="demo-tabs" @tab-change="handleClick">
-                    <el-tab-pane label="User" :name="index" v-for="(item, index) in chartList" :key="index">
+                    <el-tab-pane label="User" :name="index" v-for="(item, index) in chartList.data" :key="index">
                         <template #label>
                             <div class="chart-name">
                                 {{ item.tag }}
@@ -39,14 +40,14 @@
             </div>
             <!--折线图 -->
             <div class="charts-container">
-                <div v-for="(item, index) in chartList" :key="index" :style="{ opacity: activeName == index ? 1 : 0 }"
-                    :id="item.id" class="myChart">
+                <div v-for="(item, index) in chartList.data" :key="index"
+                    :style="{ visibility: activeName == index ? 'visible' : 'hidden' }" :id="item.id" class="myChart">
                 </div>
             </div>
         </div>
         <!-- 饼状图 -->
         <div class="piechart-container">
-            <div class="pie-chart" v-for="(item, index) in pieChartList" :key="index">
+            <div class="pie-chart" v-for="(item, index) in pieChartList.data" :key="index">
                 <div class="title">{{ item.header }}</div>
                 <div class="chart">
                     <div :id="item.id" class="mypie-chart"></div>
@@ -59,10 +60,25 @@
 </template>
 
 <script setup lang="ts">
-import { getCurrentInstance, onMounted, reactive, ref } from 'vue';
-import { dataList, chartList, pieChartList } from '@/assets/index.ts';
+import { getCurrentInstance, onMounted, reactive, ref, watch } from 'vue';
+import { MyOrder, Trade } from '@/api/index'
+import { color } from 'echarts';
+
+const dataList = reactive({
+    data: []
+})
+const chartList: any = reactive({ data: [] })
+
+const pieChartList: any = reactive({ data: [] })
+
 
 const activeName = ref(0)
+const userInfo = reactive(JSON.parse(localStorage.getItem('user')))
+
+const totalCount = ref(0)
+const monthCount = ref(0)
+
+
 
 // 通过 internalInstance.appContext.config.globalProperties 获取全局属性或方法
 
@@ -72,21 +88,29 @@ let echarts = internalInstance.appContext.config.globalProperties.$echarts;
 const chartData = reactive([])
 const pieChartData = reactive([])
 
-onMounted(() => {
+onMounted(async () => {
+    // 判断用户是否为管理员
+    if (userInfo.authority == 0) {
+        await initData({ sellid: userInfo.id })
+    }
+    else {
+        await initData({})
+    }
+
     // 生成容器数组
-    chartList.forEach((item, idx) => {
+    chartList.data.forEach((item, idx) => {
         chartData.push(ref())
         draw(chartData[idx], item.id, item.option)
     });
     // 生成容器数组
-    pieChartList.forEach((item, idx) => {
+    pieChartList.data.forEach((item, idx) => {
         pieChartData.push(ref())
         draw(pieChartData[idx], item.id, item.option)
     });
-    console.log(pieChartData);
 
 
 })
+
 
 const handleClick = (tabName) => {
     // 排他算法
@@ -94,7 +118,7 @@ const handleClick = (tabName) => {
         element.value.clear()
     });
     // 重绘
-    draw(chartData[tabName], chartList[tabName].id, chartList[tabName].option)
+    draw(chartData[tabName], chartList.data[tabName].id, chartList.data[tabName].option)
 
 
 }
@@ -108,6 +132,465 @@ const draw = (chart, id, option) => {
     chart.value.setOption(option);
 
 }
+
+const initData = async (obj) => {
+    const res = await MyOrder(obj)
+
+    if (res.data.status == 0) {
+        const { data } = res.data
+        let timer = new Date()
+        // 生成当前时间字符串
+        let date = timer.toLocaleDateString()
+        let month = date.split('/')[1]
+        initCount(data, month)
+        initTotalMoney(data, month)
+        await initTurnover(data, month)
+        initChart(data, month)
+        initPieChart(data)
+    }
+}
+const initCount = (data: any, month: string) => {
+    // 总交易数
+    let total = 0
+    // 月交易数
+    let monthTotal = 0
+    data.forEach(item => {
+        total += item.count
+        if (item.date.split(' ')[0].split('/')[1] == month) {
+            monthTotal += item.count
+        }
+    });
+    totalCount.value = total
+    monthCount.value = monthTotal
+    const countObj = {
+        title: '交易数',
+        date: '月',
+        data: monthTotal,
+        logo: '&#xe607;',
+        datacolor: '#389e0d',
+        subtitle: '总交易数',
+        subdata: total,
+        color: 'rgb(48, 150, 234)'
+    }
+    dataList.data.push(countObj)
+
+}
+const initTotalMoney = (data: any, month: string) => {
+
+    // 总交易金额
+    let total = 0
+    // 月交易金额
+    let monthTotal = 0
+    data.forEach(item => {
+        total += item.totalmoney
+        if (item.date.split(' ')[0].split('/')[1] == month) {
+            monthTotal += item.totalmoney
+        }
+    });
+    totalCount.value = total
+    monthCount.value = monthTotal
+    const totalMoneyObj = {
+        title: '交易额',
+        date: '月',
+        data: monthTotal,
+        logo: '&#xe62d;',
+        datacolor: '#389e0d',
+        subtitle: '总交易额',
+        subdata: total,
+        color: 'rgb(250, 183, 39)'
+    }
+    dataList.data.push(totalMoneyObj)
+
+}
+const initTurnover = async (data: any, month: string) => {
+    let res: any
+    // 判断用户是否为管理员
+    if (userInfo.authority == 0) {
+        res = await Trade({ id: userInfo.id, page: 'products' })
+    } else {
+        res = await Trade({})
+    }
+
+    if (res.data.status == 0) {
+        // 总交易数
+        let total = 0
+        // 月交易数
+        let monthTotal = 0
+        // 总发布数
+        let totalPublish = 0
+        // 月发布数
+        let monthPublish = 0
+        data.forEach(item => {
+            total += item.count
+            totalPublish += item.count
+            if (item.date.split(' ')[0].split('/')[1] == month) {
+                monthTotal += item.count
+                monthPublish += item.count
+            }
+        });
+        totalCount.value = total
+        monthCount.value = monthTotal
+        const countObj = {
+            title: '成交率',
+            date: '月',
+            data: (100 * monthTotal / monthPublish).toFixed(2),
+            logo: '&#xe638;',
+            datacolor: '#389e0d',
+            subtitle: '总成交率',
+            subdata: total / totalPublish,
+            color: 'rgb(250, 183, 39)'
+        }
+        dataList.data.push(countObj)
+    }
+
+
+
+}
+
+// 计算数据函数
+const calculateData = (data, month) => {
+    const map = new Map()
+    // 上一月的数据
+    const lastMonthMap = new Map()
+    data.forEach((item) => {
+        let date = item.date.split(' ')[0]
+        let nowMonth = date.split('/')[1]
+        if (nowMonth == month) {
+            if (!map.has(date)) {
+                map.set(date, { price: [item.price], count: item.count, total: item.totalmoney })
+            }
+            else {
+                let today = map.get(date)
+                today.price.push(item.price)
+                today.count += item.count
+                today.total += item.totalmoney
+            }
+        } else {
+            if (!lastMonthMap.has(date)) {
+                lastMonthMap.set(date, { price: [item.price], count: item.count, total: item.totalmoney })
+            }
+            else {
+                let today = lastMonthMap.get(date)
+                today.price.push(item.price)
+                today.count += item.count
+                today.total += item.totalmoney
+            }
+        }
+    })
+    const xAxis = Array.from(map.keys())
+
+    // 数量折线图
+    let yAxisCount = []
+    // 交易额折线图
+    let yAxisTotalMoney = []
+    // 上个月交易量
+    let yAxisLastCount = []
+    // 上个月交易额
+    let yAxisLatTotalMoney = []
+    Array.from(map.values()).forEach(item => {
+        yAxisCount.push(item.count)
+        yAxisTotalMoney.push(item.total)
+    })
+    Array.from(lastMonthMap.values()).forEach(item => {
+        yAxisLastCount.push(item.count)
+        yAxisLatTotalMoney.push(item.total)
+    })
+
+    return {
+        yAxisCount,
+        yAxisTotalMoney,
+        yAxisLastCount,
+        yAxisLatTotalMoney,
+        xAxis
+    }
+}
+
+// 按人计算
+const calculatePieData = (data) => {
+    const map = new Map()
+    data.forEach((item: any) => {
+        let buyer = item.buyer
+        if (!map.has(buyer)) map.set(buyer, { count: 0, total: 0 })
+        if (map.has(buyer)) {
+            let newTotal = map.get(buyer).total
+            let newCount = map.get(buyer).count
+            newTotal += item.totalmoney
+            newCount += item.count
+            map.set(buyer, { count: newCount, total: newTotal })
+        }
+
+    })
+    return map
+}
+
+const initChart = (data, month: string) => {
+    const { yAxisCount,
+        yAxisTotalMoney,
+        yAxisLastCount,
+        yAxisLatTotalMoney,
+        xAxis } = calculateData(data, month)
+    let countObj = {
+        data: yAxisCount,
+        type: 'line',
+        smooth: true,
+        areaStyle: {
+            color: '#90D2FD',
+            opacity: 0.5
+        },
+
+    }
+    let totalMoneyObj = {
+        data: yAxisTotalMoney,
+        type: 'line',
+        smooth: true,
+        areaStyle: {
+            color: '#90D2FD',
+            opacity: 0.5
+        }
+
+    }
+    let lastCountObj = {
+        data: [5, 1, 8, 4],
+        type: 'line',
+        smooth: true,
+        areaStyle: {
+            color: '#90D2FD',
+            opacity: 0.5
+        }
+    }
+    let lastTotalMoneyObj = {
+        data: [400, 650, 760, 1002],
+        type: 'line',
+        smooth: true,
+        areaStyle: {
+            color: '#90D2FD',
+            opacity: 0.5
+        }
+
+    }
+    const chartCountObj: any = {
+        id: 'mychart1',
+        tag: '交易量',
+        option: {
+            xAxis: {
+                type: 'category',
+                data: xAxis
+            },
+            yAxis: {
+                type: 'value',
+            },
+            grid: {
+                // show: true,
+                containLabel: true,
+                left: '3%',
+                top: '5%',
+                bottom: '5%',
+                right: '3%'
+            },
+            tooltip: {
+                trigger: 'item',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                }
+
+            },
+            series: [
+            ]
+        }
+    }
+    chartCountObj.option.series.push(countObj, lastCountObj)
+    const chartMoneyObj: any = {
+        id: 'mychart2',
+        tag: '交易额',
+        option: {
+            xAxis: {
+                type: 'category',
+                data: xAxis
+            },
+            yAxis: {
+                type: 'value',
+            },
+            grid: {
+                // show: true,
+                containLabel: true,
+                left: '3%',
+                top: '5%',
+                bottom: '5%',
+                right: '3%'
+            },
+            tooltip: {
+                trigger: 'item',
+                axisPointer: {
+                    type: 'cross',
+                    label: {
+                        backgroundColor: '#6a7985'
+                    }
+                },
+
+            },
+            series: [
+            ]
+        }
+    }
+    chartMoneyObj.option.series.push(totalMoneyObj, lastTotalMoneyObj)
+
+
+    chartList.data = [chartCountObj, chartMoneyObj]
+    console.log(chartList.data);
+
+
+
+
+
+
+}
+
+const initPieChart = (data) => {
+    const map = calculatePieData(data)
+    const povit = 5
+    // 4展示前五名
+    const optionCount = Array.from(map.keys()).slice(0, povit).map((name) => {
+        return {
+            value: map.get(name).count,
+            name: name
+        }
+    })
+    const optionTotalMoney = Array.from(map.keys()).slice(0, povit).map((name) => {
+        return {
+            value: map.get(name).total,
+            name: name
+        }
+    })
+    let remainCount = { value: 0, name: '其他' }
+    Array.from(map.keys()).slice(povit).forEach((name) => {
+        remainCount.value += map.get(name).count
+    })
+    let remainTotalMoney = { value: 0, name: '其他' }
+    Array.from(map.keys()).slice(povit).forEach((name) => {
+        remainTotalMoney += map.get(name).total
+    })
+    if (remainCount.value) optionCount.push(remainCount)
+    if (remainTotalMoney.value) optionTotalMoney.push(remainTotalMoney)
+
+
+
+    const countObj = {
+        header: '数量分布',
+        id: 'piechart1',
+        option: {
+            tooltip: {
+                formatter: "{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'horizontal',
+                x: 'center',
+                y: '335',
+                data: Array.from(map.keys())
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: optionCount,
+                    radius: '65%',
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        formatter: '{b} {c}吨'
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: function (colors) {
+                                var colorList = [
+                                    '#fc8251',
+                                    '#5470c6',
+                                    '#91cd77',
+                                    '#ef6567',
+                                    '#f9c956',
+                                    '#75bedc'
+                                ];
+                                return colorList[colors.dataIndex];
+                            }
+                        },
+                    }
+
+                },
+                {
+                    name: '购买比例',
+                    type: 'pie',
+                    data: optionCount,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        formatter: '{d}%'
+                    },
+                    itemStyle: {
+                        normal: {
+                            color: function (colors) {
+                                var colorList = [
+                                    '#fc8251',
+                                    '#5470c6',
+                                    '#91cd77',
+                                    '#ef6567',
+                                    '#f9c956',
+                                    '#75bedc'
+                                ];
+                                return colorList[colors.dataIndex];
+                            }
+                        },
+                    }
+
+                },
+
+            ]
+        }
+    }
+    const totalMoneyObj = {
+        header: '金额分布',
+        id: 'piechart2',
+        option: {
+            tooltip: {
+                formatter: "{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'horizontal',
+                x: 'center',
+                y: '335',
+                data: Array.from(map.keys())
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: optionTotalMoney,
+                    radius: '65%',
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        formatter: '{b} {c}吨'
+                    },
+                },
+                {
+                    name: '购买比例',
+                    type: 'pie',
+                    data: optionTotalMoney,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        formatter: '{d}%'
+                    },
+
+                }
+            ]
+        }
+    }
+    console.log(Array.from(map.keys()));
+
+    pieChartList.data = [countObj, totalMoneyObj]
+
+}
+
 
 
 </script>
@@ -187,6 +670,15 @@ const draw = (chart, id, option) => {
                     span {
                         display: flex;
                         align-items: center;
+                    }
+
+                    .number {
+                        font-size: 28px;
+                        font-weight: 500;
+                    }
+
+                    .iconfont {
+                        font-size: 36px;
                     }
 
                 }

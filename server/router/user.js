@@ -42,7 +42,8 @@ router.get('/getContract', userhandle.getContract)
 router.post('/addContract', userhandle.addContract)
 // 修改库存
 router.post('/buyContract', userhandle.buyContract)
-
+// 修改y用户信息
+router.post('/updateUserInfo', userhandle.updateUserInfo)
 
 
 

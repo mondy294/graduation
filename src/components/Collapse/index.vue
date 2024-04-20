@@ -165,6 +165,7 @@ const test = (children) => {
 }
 
 .currentContent {
+    transition: all 0.2s;
     background-color: #0960BD;
     color: #fff;
 }

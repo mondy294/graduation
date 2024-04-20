@@ -4,8 +4,8 @@
             <span>{{ route.name }} / {{ route.meta.pageName }}</span>
         </div>
         <div class="right">
-            <div class="repertory">当前余额：{{ repertory }}</div>
-            <div class="toolList">
+            <div v-if="!userInfo.authority" class="repertory">当前余额：{{ repertory }}</div>
+            <div v-if="!userInfo.authority" class="toolList">
                 <div @click="toIcon(item.path)" class="toolItem" v-for="(item, index) in toolList" :key="index">
                     <el-tooltip class="box-item" effect="dark" :content="item.tips" placement="bottom">
                         <div v-if="item.icon" class="toolIcon iconfont" v-html="item.icon"></div>

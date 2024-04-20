@@ -8,6 +8,8 @@ import Products from '@/pages/Trade/Products.vue'
 import Order from '@/pages/Trade/Order.vue'
 import Chat from '@/pages/Chat/Chat.vue'
 import Contract from '@/pages/Contract/Contract.vue'
+import UserManage from '@/pages/UserManage/UserManage.vue'
+import Allocation from '@/pages/Allocation/Allocation.vue'
 
 import Panel from '@/pages/Panel/Panel.vue'
 
@@ -124,6 +126,31 @@ const routes: any[] = [
                 meta: {
                     pageName: '行情面板',
                     id: [2, 0]
+                }
+            },
+        ]
+    },
+    {
+        path: '/home/admin',
+        name: 'admin',
+        component: Home,
+        children: [
+            {
+                path: 'usermanage',
+                component: UserManage,
+                name: 'usermanage',
+                meta: {
+                    pageName: '用户管理',
+                    id: [2, 0]
+                }
+            },
+            {
+                path: 'allocation',
+                component: Allocation,
+                name: 'allocation',
+                meta: {
+                    pageName: '碳分配',
+                    id: [2, 1]
                 }
             },
         ]

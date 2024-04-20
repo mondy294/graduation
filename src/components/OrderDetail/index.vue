@@ -102,6 +102,16 @@ const countTrend = () => {
             data: Array.from(map.keys())
         },
         yAxis: {},
+        tooltip: {
+            trigger: 'item',
+            axisPointer: {
+                type: 'cross',
+                label: {
+                    backgroundColor: '#6a7985'
+                }
+            }
+
+        },
         series: [
             {
                 type: 'line',
