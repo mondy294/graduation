@@ -5,8 +5,8 @@
             <el-button v-if="productList.data.length" type="primary" @click="cancle">撤消</el-button>
         </div>
         <el-table v-loading="loading" element-loading-text="Loading..."
-            :data="productList.data.slice(10 * (currentPage - 1), 10 * currentPage)" style="width: 100%"
-            @selection-change="handleSelectionChange" height="1200"
+            :data="productList.data.slice(PAGE_SIEE * (currentPage - 1), PAGE_SIEE * currentPage)" style="width: 100%"
+            @selection-change="handleSelectionChange" height="1000"
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="您暂未发布任何商品~">
 
             <el-table-column v-if="productList.data.length" type="selection" width="55" />
@@ -94,6 +94,7 @@ import { ElMessage } from 'element-plus';
 import { getRepertory } from './index'
 import { MessageBox } from '@/utils/index'
 import OrderDetail from '@/components/OrderDetail/index.vue'
+import { PAGE_SIEE } from '@/constant'
 
 
 
@@ -106,6 +107,8 @@ const remain = ref()
 const selections = reactive({
     data: []
 })
+
+
 const productList = reactive({
     data: []
 })
@@ -173,6 +176,7 @@ const cancle = async () => {
         return
     }
     const idList = []
+
     let repertory = await getRepertory(userInfo.id)
     selections.data.forEach((item) => {
         idList.push(item.id)
@@ -184,6 +188,10 @@ const cancle = async () => {
         await getProducts()
         await getRepertory(userInfo.id)
         ElMessage.success('删除成功')
+        const message: MessageBox = {
+            type: 4
+        }
+        socket.send(JSON.stringify(message))
     }
 }
 // 发布商品
@@ -213,7 +221,7 @@ const publish = async () => {
 
 }
 const handleSelectionChange = (data) => {
-    selections.data.push(...data)
+    selections.data = [...data]
 
 }
 

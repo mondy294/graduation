@@ -41,7 +41,7 @@
 
         </el-table>
         <div class="pagination">
-            <el-pagination :page-size="2" layout="prev, pager, next" :total="OrderData.data.length"
+            <el-pagination :page-size="10" layout="prev, pager, next" :total="OrderData.data.length"
                 v-model:current-page="currentPage" hide-on-single-page />
         </div>
     </div>
@@ -120,7 +120,7 @@ const initChart = async () => {
                 low: arr[0],
                 high: arr[arr.length - 1],
                 count: info.count,
-                total: info.total,
+                total: info.total.toFixed(2),
                 amplitude: (arr[arr.length - 1] / arr[0]).toFixed(2)
             }
         })
@@ -132,20 +132,21 @@ const initChart = async () => {
         })
 
         market.reverse()
-        inintData(finalData)
+        inintData(finalData, chartData)
         return market
     }
 }
 
 
 // 初始化图表数据
-const inintData = (data) => {
+const inintData = (data: any, allData: any) => {
     const help = [];
     const positive = [];
     const negative = [];
+    let copy = data[0]
+    data[0] = 1
 
-
-    for (var i = 0, sum = 0; i < data.length; ++i) {
+    for (var i = 0, sum = copy; i < data.length; ++i) {
         if (data[i] >= 0) {
             positive.push(data[i]);
             negative.push('-');
@@ -155,7 +156,7 @@ const inintData = (data) => {
         }
 
         if (i === 0) {
-            help.push(0);
+            help.push(copy);
         } else {
             sum += data[i - 1];
             if (data[i] < 0) {
@@ -180,7 +181,7 @@ const inintData = (data) => {
             data: (function () {
                 var list = [];
                 for (var i = 1; i <= data.length; i++) {
-                    list.push('Oct/' + i);
+                    list.push('Apr/' + i);
                 }
                 return list;
             })()
@@ -212,7 +213,17 @@ const inintData = (data) => {
                 data: positive,
                 itemStyle: {
                     color: 'red'
-                }
+                },
+                tooltip: {
+                    trigger: 'item',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+
+                },
             },
             {
                 name: 'negative',
@@ -221,6 +232,25 @@ const inintData = (data) => {
                 data: negative,
                 itemStyle: {
                     color: 'green'
+                },
+            },
+            {
+                type: 'line',
+                data: allData,
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true, //开启显示
+                            position: 'top', //在上方显示
+                            textStyle: { //数值样式
+                                color: 'black',
+                                fontSize: 14
+                            },
+                            formatter: function (params) {
+                                return params.value.toFixed(2)
+                            }
+                        }
+                    }
                 }
             }
         ]

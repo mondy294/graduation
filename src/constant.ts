@@ -7,6 +7,8 @@ const CONTRACT = 5
 const REFRESH_CONTRACT = 6
 const PORT = 'http://127.0.0.1:3007/'
 
+const PAGE_SIEE = 20
+
 
 
 export {
@@ -17,5 +19,6 @@ export {
     FINISH_FRIEND,
     REPERTORY,
     CONTRACT,
-    REFRESH_CONTRACT
+    REFRESH_CONTRACT,
+    PAGE_SIEE
 }

@@ -94,12 +94,15 @@ const countTrend = () => {
         count -= yAxisData[i]
         yAxisData[i] = count
     }
+    yAxisData.unshift(props.total)
+    let xAxis = Array.from(map.keys())
+    xAxis.unshift("初始")
     return {
         title: {
             text: '数量趋势'
         },
         xAxis: {
-            data: Array.from(map.keys())
+            data: xAxis
         },
         yAxis: {},
         tooltip: {

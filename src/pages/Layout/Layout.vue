@@ -41,7 +41,7 @@ const flag = ref(false)
 localStorage.setItem('flag', '0')
 
 const changeFlat = () => {
-    flag.value = !flag.value
+    flag.value = false
 }
 
 

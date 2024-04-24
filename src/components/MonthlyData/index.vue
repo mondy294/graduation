@@ -6,7 +6,7 @@
         </div>
         <div class="item">
             总计花费
-            <span>{{ totalCost }}</span>
+            <span>{{ totalCost.toFixed(2) }}</span>
             ￥
         </div>
         <div class="item">
@@ -25,7 +25,7 @@ import { orderItem } from '@/utils/index'
 const totalBuy = ref(0)
 const totalCost = ref(0)
 const perMoney = computed(() => {
-    return totalBuy.value == 0 ? 0 : (totalCost.value / totalBuy.value).toFixed(1)
+    return totalBuy.value == 0 ? 0 : (totalCost.value / totalBuy.value).toFixed(2)
 })
 
 const props = defineProps(['orderList'])

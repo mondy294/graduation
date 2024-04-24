@@ -2,7 +2,8 @@ export interface LayOutItem {
     text: string,
     icon?: string,
     children?: LayOutItem[],
-    path?: string
+    path?: string,
+    logo?: string
 }
 export interface LayOutList {
     [index: number]: LayOutItem

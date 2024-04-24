@@ -2,6 +2,7 @@
     <div class="chat" ref="chat">
         <div class="chatbox" v-for="(item, index) in history.data" :key="index">
             <div v-if="item.id == userInfo.id" class="right">
+                <div class="nickname">{{ userInfo.nickname }}</div>
                 <div class="avatar">
                     <img :src="PORT + person.data.user_pic" alt="">
                 </div>
@@ -30,6 +31,7 @@
                 </div>
             </div>
             <div v-else class="left">
+                <div class="nickname">{{ person.data.nickname }}</div>
                 <div class="avatar">
                     <img :src="PORT + person.data.user_pic" alt="">
                 </div>
@@ -283,6 +285,17 @@ const toContract = (item: any) => {
 
             width: 100%;
 
+            .nickname {
+                position: absolute;
+                width: 100px;
+                padding: 0 2px;
+                left: 50px;
+                font-size: 12px;
+                color: gray;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+            }
 
             .avatar {
                 position: absolute;
@@ -306,7 +319,7 @@ const toContract = (item: any) => {
                 color: #fff;
                 position: relative;
                 left: 50px;
-                top: 10px;
+                top: 20px;
                 padding: 5px 5px;
                 display: inline-block;
                 border-radius: 4px;
@@ -323,7 +336,7 @@ const toContract = (item: any) => {
                 height: 300px;
                 position: relative;
                 left: 50px;
-                top: 10px;
+                top: 20px;
                 padding: 5px 5px;
                 display: inline-block;
                 border-radius: 4px;
@@ -398,6 +411,19 @@ const toContract = (item: any) => {
             width: 100%;
             text-align: right;
 
+            .nickname {
+                font-size: 12px;
+                color: gray;
+                width: 100px;
+                position: absolute;
+                right: 50px;
+                padding: 0 2px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+                z-index: 111;
+            }
+
             .avatar {
                 position: absolute;
                 right: 0px;
@@ -419,7 +445,7 @@ const toContract = (item: any) => {
                 color: #fff;
                 position: relative;
                 right: 50px;
-                top: 10px;
+                top: 20px;
                 padding: 5px 5px;
                 display: inline-block;
                 border-radius: 4px;
@@ -437,7 +463,7 @@ const toContract = (item: any) => {
                 height: 300px;
 
                 right: 50px;
-                top: 10px;
+                top: 20px;
                 padding: 5px 5px;
                 padding-bottom: 10px;
                 border-radius: 4px;

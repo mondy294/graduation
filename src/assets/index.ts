@@ -5,6 +5,7 @@ const layOutList: LayOutList = [
     {
         text: 'Dashboard',
         path: '/dashboard',
+        logo: '&#xe653;',
         children: [
             {
                 text: '分析页',
@@ -15,6 +16,7 @@ const layOutList: LayOutList = [
     {
         text: '交易中心',
         path: '/trade',
+        logo: '&#xe699;',
         children: [
             {
                 text: '交易中心',
@@ -33,6 +35,7 @@ const layOutList: LayOutList = [
     {
         text: '碳价行情',
         path: '/market',
+        logo: '&#xe662;',
         children: [
             {
                 text: '行情面板',
@@ -43,6 +46,7 @@ const layOutList: LayOutList = [
     {
         text: '契约管理中心',
         path: '/contract',
+        logo: '&#xe7f1;',
         children: [
             {
                 text: '契约详情',
@@ -100,11 +104,6 @@ const toolList: ToolList = [
         icon: '&#xe650;',
         tips: '消息',
         path: ''
-    },
-    {
-        icon: '&#xe68d;',
-        tips: '聊天',
-        path: '/home/chat'
     },
     {
         icon: '&#xe68d;',

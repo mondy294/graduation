@@ -40,7 +40,7 @@
             </div>
         </div>
         <el-table v-loading="loading" element-loading-text="Loading..."
-            :data="productList.data.slice(20 * (currentPage - 1), 20 * currentPage)" height="1000"
+            :data="productList.data.slice(PAGE_SIEE * (currentPage - 1), PAGE_SIEE * currentPage)" height="1000"
             :default-sort="{ prop: 'date', order: 'descending' }" empty-text="暂无任何发布~">
             <el-table-column v-if="false" type="selection" width="55" />
             <el-table-column prop="date" label="日期" sortable>
@@ -73,7 +73,8 @@
 
                 <template #default="scope">
                     <el-button size="small" type="primary" @click="handleBuy(scope.$index, scope.row)">购买</el-button>
-                    <el-button size="small" type="primary" @click="handleAddFriend($event, scope.row)">加好友</el-button>
+                    <el-button :disabled="friends.data.includes(scope.row.sellid + '')" size="small" type="primary"
+                        @click="handleAddFriend($event, scope.row)">加好友</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -106,10 +107,10 @@
 
 <script setup lang="ts">
 import { Timer } from '@element-plus/icons-vue'
-import { Trade, Purchase, addFriend, getFriend, getUserInfo } from '@/api/index'
-import { onMounted, reactive, ref, computed } from 'vue';
+import { Trade, Purchase, addFriend, getFriend, getUserInfo, Cancle } from '@/api/index'
+import { onMounted, reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import { PORT, ADD_FRIEND, LOGIN, FINISH_FRIEND, TEXT, REPERTORY } from '@/constant'
+import { PORT, REPERTORY, PAGE_SIEE } from '@/constant'
 
 import { TradeRow, MessageBox } from '@/utils/index'
 import { getRepertory } from './index'
@@ -164,8 +165,8 @@ socket.addEventListener('message', async (e) => {
 
             const { data }: { data: [] } = res.data
             // 备份数组
-            copy = data
-            productList.data = data
+            productList.data = data.filter((item: any) => item.remain > 0)
+            copy = productList.data
         }
     }
 
@@ -176,7 +177,8 @@ socket.addEventListener('message', async (e) => {
 
 onMounted(async () => {
     await getAllUser()
-    userlist = userlist.filter((item) => item.id != userInfo.id)
+    await getFriendList()
+    userlist = userlist.filter((item) => item.id != userInfo.id && item.authority == 0)
     // 获取当前库存
     currentRepertory.value = JSON.parse(localStorage.getItem('repertory'))
     // 获取商品列表
@@ -298,7 +300,7 @@ const getTrade = async () => {
             // 不展示卖完的商品
             productList.data = data.filter((item: any) => item.remain > 0)
             // 备份数组
-            copy = data
+            copy = productList.data
             setTimeout(() => {
                 loading.value = false
             }, 500);
@@ -320,8 +322,6 @@ const getAllUser = async () => {
     if (res.data.status == 0) {
         const { data } = res.data
         userlist = data
-
-
     }
 }
 

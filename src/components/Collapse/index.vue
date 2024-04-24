@@ -4,7 +4,7 @@
             <div class="collapse-item" v-for="(item, index) in layOutList" :key="index">
                 <div class="collapse-header" :class="{ arrowDown: arr.includes(index) }"
                     @click="currentCollapse(index)">
-                    <i class="iconfont icon">&#xe653;</i>
+                    <i class="iconfont icon" v-html="item.logo"></i>
                     <div class="collapse-title"> {{ item.text }}</div>
                     <span class="iconfont arrow">&#xe65f;</span>
                 </div>

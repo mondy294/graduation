@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "2803731",
+      "name": "行情",
+      "font_class": "hangqing",
+      "unicode": "e6a9",
+      "unicode_decimal": 59049
+    },
+    {
+      "icon_id": "8135709",
+      "name": "契约管理",
+      "font_class": "qiyueguanli",
+      "unicode": "e7f1",
+      "unicode_decimal": 59377
+    },
+    {
+      "icon_id": "11494999",
+      "name": "行情",
+      "font_class": "hangqing1",
+      "unicode": "e662",
+      "unicode_decimal": 58978
+    },
+    {
+      "icon_id": "39613149",
+      "name": "银行交易中心",
+      "font_class": "a-bankyinhangjiaoyizhongxinjingmaocaijing",
+      "unicode": "e699",
+      "unicode_decimal": 59033
+    },
+    {
+      "icon_id": "6517444",
+      "name": "操作-支出",
+      "font_class": "cz-zc",
+      "unicode": "e70c",
+      "unicode_decimal": 59148
+    },
+    {
       "icon_id": "2797484",
       "name": "转化率",
       "font_class": "zhuanhuashuai1",

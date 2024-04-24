@@ -151,19 +151,24 @@ exports.buy = (req, res) => {
 
 exports.cancle = (req, res) => {
     const { idList, repertory, sellid } = req.body
-    let sqlstr = 'delete from trade where id = ?'
-    for (let i = 0; i < idList.length; i++) {
-        db.query(sqlstr, idList[i], function (err, results) {
-            if (err) {
-                return res.send({ status: 1, message: err.message })
-            }
-            else {
-                // 返还库存
-                res.send({ status: 0, message: '删除成功' })
-            }
-        })
-    }
-    EditRepertory(repertory, sellid, res)
+    idListStr = ''
+    idList.forEach((item) => {
+        idListStr += item + ','
+    })
+    idListStr = idListStr.substring(0, idListStr.length - 1)
+    console.log(idListStr);
+    let sqlstr = `delete from trade where id in (${idListStr})`
+    db.query(sqlstr, function (err, results) {
+        if (err) {
+            return res.send({ status: 1, message: err.message })
+        }
+        else {
+            // 返还库存 
+            EditRepertory(repertory, sellid, res, '删除成功')
+        }
+    })
+
+
 }
 
 exports.publish = (req, res) => {

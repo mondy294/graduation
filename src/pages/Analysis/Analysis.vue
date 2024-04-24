@@ -9,7 +9,7 @@
                 </div>
                 <div class="screen">
                     <div class="screen-data">
-                        <span v-if="Number.isInteger(item.data)">
+                        <span v-if="item.title != '成交率'">
                             <AnimatedNumber class="number" :from="0" :to="item.data"></AnimatedNumber>
                         </span>
                         <span class="number" v-else>{{ item.data }}%</span>
@@ -91,7 +91,7 @@ const pieChartData = reactive([])
 onMounted(async () => {
     // 判断用户是否为管理员
     if (userInfo.authority == 0) {
-        await initData({ sellid: userInfo.id })
+        await initData({})
     }
     else {
         await initData({})
@@ -136,17 +136,22 @@ const draw = (chart, id, option) => {
 const initData = async (obj) => {
     const res = await MyOrder(obj)
 
+
     if (res.data.status == 0) {
-        const { data } = res.data
+        let { data } = res.data
+        const copy = data
+        data = data.filter(item => item.sellid == userInfo.id)
+
         let timer = new Date()
         // 生成当前时间字符串
         let date = timer.toLocaleDateString()
         let month = date.split('/')[1]
         initCount(data, month)
         initTotalMoney(data, month)
+        initTotalBuyMoney(copy, month)
         await initTurnover(data, month)
         initChart(data, month)
-        initPieChart(data)
+        initPieChart(copy)
     }
 }
 const initCount = (data: any, month: string) => {
@@ -192,11 +197,11 @@ const initTotalMoney = (data: any, month: string) => {
     const totalMoneyObj = {
         title: '交易额',
         date: '月',
-        data: monthTotal,
+        data: monthTotal.toFixed(2) + '￥',
         logo: '&#xe62d;',
         datacolor: '#389e0d',
         subtitle: '总交易额',
-        subdata: total,
+        subdata: total + '￥',
         color: 'rgb(250, 183, 39)'
     }
     dataList.data.push(totalMoneyObj)
@@ -246,6 +251,34 @@ const initTurnover = async (data: any, month: string) => {
 
 
 }
+const initTotalBuyMoney = (data: any, month: string) => {
+
+    // 总交易金额
+    let total = 0
+    // 月交易金额
+    let monthTotal = 0
+    data.filter(item => item.buyid == userInfo.id)
+    data.forEach(item => {
+        total += item.totalmoney
+        if (item.date.split(' ')[0].split('/')[1] == month) {
+            monthTotal += item.totalmoney
+        }
+    });
+    totalCount.value = total
+    monthCount.value = monthTotal
+    const totalMoneyObj = {
+        title: '支出成本',
+        date: '月',
+        data: monthTotal.toFixed(2) + '￥',
+        logo: '&#xe70c;',
+        datacolor: '#389e0d',
+        subtitle: '总交易额',
+        subdata: total + '￥',
+        color: 'rgb(56, 158, 13)'
+    }
+    dataList.data.push(totalMoneyObj)
+
+}
 
 // 计算数据函数
 const calculateData = (data, month) => {
@@ -277,23 +310,32 @@ const calculateData = (data, month) => {
             }
         }
     })
-    const xAxis = Array.from(map.keys())
+    // const xAxis = Array.from(map.keys())
+    const xAxis = []
+    for (let i = 1; i < 31; i++) {
+        xAxis.push(month + '/' + i)
+    }
+    console.log(xAxis);
 
     // 数量折线图
-    let yAxisCount = []
+    let yAxisCount = new Array(31).fill(0)
     // 交易额折线图
-    let yAxisTotalMoney = []
+    let yAxisTotalMoney = new Array(31).fill(0)
     // 上个月交易量
-    let yAxisLastCount = []
+    let yAxisLastCount = new Array(31).fill(0)
     // 上个月交易额
-    let yAxisLatTotalMoney = []
-    Array.from(map.values()).forEach(item => {
-        yAxisCount.push(item.count)
-        yAxisTotalMoney.push(item.total)
+    let yAxisLatTotalMoney = new Array(31).fill(0)
+    Array.from(map.keys()).forEach(item => {
+        const idx = item.split('/')[2]
+        yAxisCount[idx] = map.get(item).count
+        yAxisTotalMoney[idx] = map.get(item).total
     })
-    Array.from(lastMonthMap.values()).forEach(item => {
-        yAxisLastCount.push(item.count)
-        yAxisLatTotalMoney.push(item.total)
+    console.log(yAxisCount);
+
+    Array.from(lastMonthMap.keys()).forEach(item => {
+        const idx = item.split('/')[2]
+        yAxisLastCount[idx] = lastMonthMap.get(item).count
+        yAxisLatTotalMoney[idx] = lastMonthMap.get(item).total
     })
 
     return {
@@ -308,18 +350,43 @@ const calculateData = (data, month) => {
 // 按人计算
 const calculatePieData = (data) => {
     const map = new Map()
+    data = data.filter(item => item.sellid = userInfo.id)
     data.forEach((item: any) => {
         let buyer = item.buyer
         if (!map.has(buyer)) map.set(buyer, { count: 0, total: 0 })
         if (map.has(buyer)) {
-            let newTotal = map.get(buyer).total
+            let newTotal: string | number = parseFloat(map.get(buyer).total)
             let newCount = map.get(buyer).count
             newTotal += item.totalmoney
             newCount += item.count
+            newTotal = newTotal.toFixed(2)
             map.set(buyer, { count: newCount, total: newTotal })
         }
 
     })
+    return map
+}
+// 我的购买分布
+const calculateBuyPieData = (data) => {
+    data = data.filter(item => {
+        return item.buyid == userInfo.id
+    })
+
+    const map = new Map()
+    data.forEach((item: any) => {
+        let seller = item.seller
+        if (!map.has(seller)) map.set(seller, { count: 0, total: 0 })
+        if (map.has(seller)) {
+            let newTotal: string | number = parseFloat(map.get(seller).total)
+            let newCount = map.get(seller).count
+            newTotal += item.totalmoney
+            newCount += item.count
+            newTotal = newTotal.toFixed(2)
+            map.set(seller, { count: newCount, total: newTotal })
+        }
+
+    })
+
     return map
 }
 
@@ -337,6 +404,21 @@ const initChart = (data, month: string) => {
             color: '#90D2FD',
             opacity: 0.5
         },
+        itemStyle: {
+            normal: {
+                label: {
+                    show: true, //开启显示
+                    position: 'right', //在上方显示
+                    textStyle: { //数值样式
+                        color: 'black',
+                        fontSize: 16
+                    },
+                    formatter: function (params) {
+                        if (params.value == 0) return ''
+                    }
+                }
+            }
+        },
 
     }
     let totalMoneyObj = {
@@ -346,26 +428,71 @@ const initChart = (data, month: string) => {
         areaStyle: {
             color: '#90D2FD',
             opacity: 0.5
-        }
+        },
+        itemStyle: {
+            normal: {
+                label: {
+                    show: true, //开启显示
+                    position: 'right', //在上方显示
+                    textStyle: { //数值样式
+                        color: 'black',
+                        fontSize: 16
+                    },
+                    formatter: function (params) {
+                        if (params.value == 0) return ''
+                    }
+                }
+            }
+        },
 
     }
     let lastCountObj = {
-        data: [5, 1, 8, 4],
+        data: yAxisLastCount,
         type: 'line',
         smooth: true,
         areaStyle: {
             color: '#90D2FD',
             opacity: 0.5
-        }
+        },
+        itemStyle: {
+            normal: {
+                label: {
+                    show: true, //开启显示
+                    position: 'right', //在上方显示
+                    textStyle: { //数值样式
+                        color: 'gray',
+                        fontSize: 16
+                    },
+                    formatter: function (params) {
+                        if (params.value == 0) return ''
+                    }
+                }
+            }
+        },
     }
     let lastTotalMoneyObj = {
-        data: [400, 650, 760, 1002],
+        data: yAxisLatTotalMoney,
         type: 'line',
         smooth: true,
         areaStyle: {
             color: '#90D2FD',
             opacity: 0.5
-        }
+        },
+        itemStyle: {
+            normal: {
+                label: {
+                    show: true, //开启显示
+                    position: 'right', //在上方显示
+                    textStyle: { //数值样式
+                        color: 'gray',
+                        fontSize: 16
+                    },
+                    formatter: function (params) {
+                        if (params.value == 0) return ''
+                    }
+                }
+            }
+        },
 
     }
     const chartCountObj: any = {
@@ -398,6 +525,7 @@ const initChart = (data, month: string) => {
 
             },
             series: [
+
             ]
         }
     }
@@ -449,7 +577,11 @@ const initChart = (data, month: string) => {
 }
 
 const initPieChart = (data) => {
-    const map = calculatePieData(data)
+    const map = calculatePieData([...data])
+    const mapBuy = calculateBuyPieData([...data])
+    console.log(mapBuy);
+
+
     const povit = 5
     // 4展示前五名
     const optionCount = Array.from(map.keys()).slice(0, povit).map((name) => {
@@ -464,6 +596,12 @@ const initPieChart = (data) => {
             name: name
         }
     })
+    const optionBuyCount = Array.from(mapBuy.keys()).slice(0, povit).map((name) => {
+        return {
+            value: mapBuy.get(name).count,
+            name: name
+        }
+    })
     let remainCount = { value: 0, name: '其他' }
     Array.from(map.keys()).slice(povit).forEach((name) => {
         remainCount.value += map.get(name).count
@@ -472,9 +610,13 @@ const initPieChart = (data) => {
     Array.from(map.keys()).slice(povit).forEach((name) => {
         remainTotalMoney += map.get(name).total
     })
+    let remainBuyCount = { value: 0, name: '其他' }
+    Array.from(mapBuy.keys()).slice(povit).forEach((name) => {
+        remainCount.value += map.get(name).count
+    })
     if (remainCount.value) optionCount.push(remainCount)
     if (remainTotalMoney.value) optionTotalMoney.push(remainTotalMoney)
-
+    if (remainBuyCount.value) optionBuyCount.push(remainTotalMoney)
 
 
     const countObj = {
@@ -494,7 +636,7 @@ const initPieChart = (data) => {
                 {
                     type: 'pie',
                     data: optionCount,
-                    radius: '65%',
+                    radius: '45%',
                     label: {
                         show: true,
                         position: 'outside',
@@ -564,7 +706,7 @@ const initPieChart = (data) => {
                 {
                     type: 'pie',
                     data: optionTotalMoney,
-                    radius: '65%',
+                    radius: '40%',
                     label: {
                         show: true,
                         position: 'outside',
@@ -585,9 +727,46 @@ const initPieChart = (data) => {
             ]
         }
     }
-    console.log(Array.from(map.keys()));
+    const countBuyObj = {
+        header: '购买分布',
+        id: 'piechart3',
+        option: {
+            tooltip: {
+                formatter: "{b} : {c} ({d}%)"
+            },
+            legend: {
+                orient: 'horizontal',
+                x: 'center',
+                y: '335',
+                data: Array.from(mapBuy.keys())
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: optionBuyCount,
+                    radius: '40%',
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        formatter: '{b} {c}吨'
+                    },
+                },
+                {
+                    name: '购买比例',
+                    type: 'pie',
+                    radius: '75%',
+                    data: optionBuyCount,
+                    label: {
+                        show: true,
+                        position: 'inside',
+                        formatter: '{d}%'
+                    },
 
-    pieChartList.data = [countObj, totalMoneyObj]
+                }
+            ]
+        }
+    }
+    pieChartList.data = [countObj, totalMoneyObj, countBuyObj]
 
 }
 

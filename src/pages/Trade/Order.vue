@@ -6,10 +6,8 @@
             <el-button v-show="productList.data.length" type="primary" @click="cancle">撤消</el-button> -->
         </div>
         <el-table v-loading="loading" element-loading-text="Loading..."
-            :data="orderList.data.slice(10 * (currentPage - 1), 10 * currentPage)" style="width: 100%" height="1200"
-            :default-sort="{ prop: 'date', order: 'descending' }" empty-text="您暂未发布任何商品~">
-
-            <el-table-column v-if="orderList.data.length" type="selection" width="55" />
+            :data="orderList.data.slice(PAGE_SIEE * (currentPage - 1), PAGE_SIEE * currentPage)" style="width: 100%"
+            height="1000" :default-sort="{ prop: 'date', order: 'descending' }" empty-text="您暂未发布任何商品~">
             <el-table-column prop="date" label="日期" sortable>
                 <template #default="scope">
                     <div style="display: flex; align-items: center">
@@ -36,17 +34,17 @@
             </el-table-column>
             <el-table-column prop="price" label="价格 CO2/吨" sortable>
             </el-table-column>
-            <el-table-column prop="totalmoney" label="总价" sortable>
+            <el-table-column prop="totalmoney" label="总价 ￥" sortable>
             </el-table-column>
-            <el-table-column label="操作">
+            <!-- <el-table-column label="操作">
 
                 <template #default="scope">
                     <el-button size="small" type="primary">编辑</el-button>
                 </template>
-            </el-table-column>
+            </el-table-column> -->
         </el-table>
         <div class="pagination">
-            <el-pagination :page-size="10" layout="prev, pager, next" :total="orderList.data.length"
+            <el-pagination :page-size="PAGE_SIEE" layout="prev, pager, next" :total="orderList.data.length"
                 v-model:current-page="currentPage" hide-on-single-page />
         </div>
     </div>
@@ -58,6 +56,8 @@ import { Timer } from '@element-plus/icons-vue'
 
 import { onMounted, reactive, ref, computed, onBeforeMount } from 'vue';
 import { ElMessage } from 'element-plus';
+import { PAGE_SIEE } from '@/constant'
+
 import MonthlyData from '@/components/MonthlyData/index.vue'
 
 

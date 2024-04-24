@@ -8,7 +8,8 @@
                 </div>
             </div>
             <div class="friends" v-show="friendList.data.length && panelShow">
-                <div @click="toFriend(item)" class="friend" v-for="(item, index) in friendList.data" :key="index">
+                <div :class="{ choosen: member.person.id == item.id, prechoosen: member.person.id != item.id }"
+                    @click="toFriend(item)" class="friend" v-for="(item, index) in friendList.data" :key="index">
                     <div class="avatar">
                         <img :src="PORT + item.user_pic" alt="">
                     </div>
@@ -19,9 +20,9 @@
                         <div class="message">
                             <div class="text" v-if="item.newMessage">
                                 {{ item.newMessage }}
-                                <span>1</span>
+                                <span v-show="item.status == 0">{{ item.num }}</span>
                             </div>
-                            <div class="text" v-else>你好我是{{ item.nickname }}</div>
+                            <!-- <div class="text" v-else>你好我是{{ item.nickname }}</div> -->
                         </div>
                     </div>
                 </div>
@@ -80,6 +81,7 @@ const member = reactive({ person: {} as any })
 const history = reactive({
     data: []
 })
+const lastMessage = reactive({ data: [] })
 
 const socket = window.socket
 
@@ -107,17 +109,51 @@ socket.addEventListener('message', async (e) => {
         // 如果当前正好停留在与此人的聊天页面那么更新数据
         if (member.person.id == message.id) {
             history.data.push(message)
-
-        }
-        // 是其他人发来的信息
-        else {
+            if (!localStorage.getItem('newMessage')) {
+                localStorage.setItem('newMessage', JSON.stringify(new Array(friendList.data.length + 1).fill({})))
+            }
             friendList.data.forEach((item) => {
                 if (item.id == message.id) {
                     item.newMessage = message.text
-                    return
+                    let newMessageBox = JSON.parse(localStorage.getItem('newMessage'))
+                    // 按照用户id存储
+                    newMessageBox[item.id - 1] = { id: item.id, newmessage: message.text, status: 0, num: 1 }
+
+                    localStorage.setItem('newMessage', JSON.stringify(newMessageBox))
+                    getNewMessage()
                 }
 
             })
+            getNewMessage(member.person.id)
+        }
+        // 是其他人发来的信息 
+        else {
+
+            if (!localStorage.getItem('newMessage')) {
+                localStorage.setItem('newMessage', JSON.stringify(new Array(friendList.data.length + 1).fill({ status: 0, num: 0 })))
+            }
+
+            friendList.data.forEach((item) => {
+
+                if (item.id == message.id) {
+                    let newMessageBox = JSON.parse(localStorage.getItem('newMessage'))
+
+                    // 按照用户id存储
+                    if (newMessageBox[item.id - 1].status == 0) {
+                        newMessageBox[item.id - 1] = { id: item.id, newmessage: message.text, status: 0, num: newMessageBox[item.id - 1].num + 1 }
+                    }
+                    else {
+                        newMessageBox[item.id - 1] = { id: item.id, newmessage: message.text, status: 0, num: 1 }
+                    }
+
+
+                    localStorage.setItem('newMessage', JSON.stringify(newMessageBox))
+                    getNewMessage()
+                }
+
+            })
+            lastMessage.data = JSON.parse(localStorage.getItem('newMessage'))
+
         }
 
     }
@@ -136,10 +172,36 @@ onMounted(async () => {
     // 获取好友申请列表
     await getFriendAskList(friendAsk.data)
 
+    getNewMessage()
+
     member.person = friendList.data[0]
 
     await gethistory(member.person)
 })
+// 获取最新一条聊天记录
+const getNewMessage = (id?: number) => {
+    const newMessageBox = JSON.parse(localStorage.getItem('newMessage'))
+
+    friendList.data.forEach((item) => {
+
+        if (newMessageBox && newMessageBox[item.id - 1].newmessage) {
+            item.newMessage = newMessageBox[item.id - 1].newmessage
+            item.num = newMessageBox[item.id - 1].num
+            // 正在聊天时不显示小红点
+            if (id == item.id) {
+                item.status = 1
+                item.num = 1
+            } else {
+                item.status = newMessageBox[item.id - 1].status
+            }
+
+        } else {
+            item.newMessage = `你好我是${item.nickname}`
+            item.status = 1
+        }
+    })
+
+}
 const gethistory = async (item: any) => {
     if (!item) return
 
@@ -161,13 +223,25 @@ const gethistory = async (item: any) => {
 
 }
 
-// 获取最后一条信息
-const getNewMessage = (id: number) => {
 
-}
 
 // 去聊天
 const toFriend = async (item: any) => {
+    if (!localStorage.getItem('newMessage')) {
+        localStorage.setItem('newMessage', JSON.stringify(new Array(friendList.data.length + 1).fill({ status: 0, num: 0 })))
+    }
+    friendList.data.forEach(person => {
+        if (person.id == item.id) {
+            item.status = 1
+            item.num = 1
+            const newMessage = JSON.parse(localStorage.getItem('newMessage'))
+            console.log(newMessage);
+
+            newMessage[item.id - 1].status = 1
+            newMessage[item.id - 1].num = 1
+            localStorage.setItem('newMessage', JSON.stringify(newMessage))
+        }
+    })
     member.person = item
     await gethistory(item)
 }
@@ -358,6 +432,12 @@ const refuse = async (item: any) => {
             height: 100%;
             overflow: auto;
 
+            .choosen {
+                background-color: #0C2135;
+                color: #fff !important;
+                border-bottom: 0px !important;
+            }
+
             .panel-blank {
                 height: 45px;
                 display: flex;
@@ -367,11 +447,20 @@ const refuse = async (item: any) => {
                 font-size: 16px;
             }
 
+            .prechoosen {
+                transition: all 0.3s;
+
+                &:hover {
+                    background-color: rgba(0, 0, 0, .2);
+                }
+            }
+
             .friend {
                 width: 100%;
                 height: 60px;
                 border-bottom: 1px solid #eee;
                 cursor: pointer;
+
 
                 .avatar {
                     float: left;
