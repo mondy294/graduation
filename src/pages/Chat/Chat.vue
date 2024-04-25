@@ -2,13 +2,15 @@
     <div class="container">
         <div class="friend-list">
             <div class="search">
+                <el-input v-model="search" size="small" placeholder="搜索好友" @input="searchChange" />
                 <div class="friend-apply">
                     <span @click="panelShow = !panelShow" class="iconfont friend-ask">&#xe604;</span>
                     <span v-if="friendAskList.data.length" class="tips"></span>
                 </div>
             </div>
-            <div class="friends" v-show="friendList.data.length && panelShow">
-                <div :class="{ choosen: member.person.id == item.id, prechoosen: member.person.id != item.id }"
+            <div class="friends" v-show="panelShow">
+                <div class="no-found" v-if="friendList.data.length == 0">未找到好友</div>
+                <div v-else :class="{ choosen: member.person.id == item.id, prechoosen: member.person.id != item.id }"
                     @click="toFriend(item)" class="friend" v-for="(item, index) in friendList.data" :key="index">
                     <div class="avatar">
                         <img :src="PORT + item.user_pic" alt="">
@@ -22,10 +24,10 @@
                                 {{ item.newMessage }}
                                 <span v-show="item.status == 0">{{ item.num }}</span>
                             </div>
-                            <!-- <div class="text" v-else>你好我是{{ item.nickname }}</div> -->
                         </div>
                     </div>
                 </div>
+
             </div>
             <div v-show="!panelShow" class="friends">
                 <div class="friend" v-for="(item, index) in friendAskList.data" :key="index">
@@ -68,6 +70,7 @@ const panelShow = ref(true)
 const friendList = reactive({
     data: []
 })
+let copy = []
 
 const friendAsk = reactive({
     data: []
@@ -82,6 +85,8 @@ const history = reactive({
     data: []
 })
 const lastMessage = reactive({ data: [] })
+
+const search = ref('')
 
 const socket = window.socket
 
@@ -178,6 +183,19 @@ onMounted(async () => {
 
     await gethistory(member.person)
 })
+// 搜索好友
+const searchChange = () => {
+    if (search.value == '') {
+        friendList.data = copy
+    }
+    friendList.data = copy.filter(item => {
+        return item.nickname.includes(search.value)
+    })
+    console.log(friendList.data.length);
+
+
+
+}
 // 获取最新一条聊天记录
 const getNewMessage = (id?: number) => {
     const newMessageBox = JSON.parse(localStorage.getItem('newMessage'))
@@ -252,6 +270,7 @@ const getFriendList = async () => {
     if (res.data.status === 0) {
         const { data } = res.data
         friendList.data = data
+        copy = [...friendList.data]
 
         if (friendList.data.length == 0) {
             show.value = true
@@ -400,6 +419,7 @@ const refuse = async (item: any) => {
             border-bottom: 1px solid #eee;
             display: flex;
             align-items: center;
+            justify-content: space-between;
 
 
             .friend-apply {
@@ -431,6 +451,15 @@ const refuse = async (item: any) => {
             width: 100%;
             height: 100%;
             overflow: auto;
+
+            .no-found {
+                width: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: gray;
+                height: 45px;
+            }
 
             .choosen {
                 background-color: #0C2135;
@@ -485,6 +514,7 @@ const refuse = async (item: any) => {
                     padding: 0 10px;
 
                     .name {
+
                         height: 30px;
                         line-height: 30px;
                         text-align: start;

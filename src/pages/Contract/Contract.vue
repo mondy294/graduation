@@ -83,7 +83,7 @@
                 </div>
             </div>
             <template #footer>
-                <div v-if="contract.status == 0" class="dialog-footer">
+                <div v-if="contract.status == 0 && contract.buyid == userInfo.id" class="dialog-footer">
                     <el-button type="danger" @click="confirm('cancle')">驳回申请</el-button>
                     <el-button type="primary" @click="confirm('confirm')">
                         审核通过
