@@ -233,8 +233,12 @@ const initTurnover = async (data: any, month: string) => {
                 monthPublish += item.count
             }
         });
+        // 除数不为0
+        if (monthPublish == 0) monthPublish = Infinity
         totalCount.value = total
         monthCount.value = monthTotal
+
+
         const countObj = {
             title: '成交率',
             date: '月',
@@ -315,7 +319,6 @@ const calculateData = (data, month) => {
     for (let i = 1; i < 31; i++) {
         xAxis.push(month + '/' + i)
     }
-    console.log(xAxis);
 
     // 数量折线图
     let yAxisCount = new Array(31).fill(0)
@@ -330,8 +333,6 @@ const calculateData = (data, month) => {
         yAxisCount[idx] = map.get(item).count
         yAxisTotalMoney[idx] = map.get(item).total
     })
-    console.log(yAxisCount);
-
     Array.from(lastMonthMap.keys()).forEach(item => {
         const idx = item.split('/')[2]
         yAxisLastCount[idx] = lastMonthMap.get(item).count
@@ -567,7 +568,6 @@ const initChart = (data, month: string) => {
 
 
     chartList.data = [chartCountObj, chartMoneyObj]
-    console.log(chartList.data);
 
 
 

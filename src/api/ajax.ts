@@ -15,7 +15,7 @@ const requests = axios.create({
         'Content-Type': 'application/x-www-form-urlencoded'
     }
 })
-
+// 参数格式化
 requests.defaults.transformRequest = (data, headers) => {
     const contentType = headers['Content-Type'];
     if (contentType === "application/x-www-form-urlencoded") return qs.stringify(data);

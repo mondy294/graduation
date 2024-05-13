@@ -35,5 +35,9 @@ export default defineConfig({
       '.ts',
       '.tsx',
     ],
-  }
+  },
+  // server: {				// ← ← ← ← ← ←
+  //   host: '192.168.162.85',// ← 新增内容 ←
+  //   port: 5555
+  // }
 })
